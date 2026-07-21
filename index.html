@@ -3,27 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bella Studio · Gestión de Citas</title>
+  <title>Gestión de Citas</title>
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=9">
 </head>
 <body>
   <div class="app">
     <header class="app-header">
       <div class="brand">
-        <span class="brand-icon">✂️</span>
-        <div>
-          <h1>Bella Studio</h1>
-          <p>Gestión de citas</p>
-        </div>
+        <span class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="16" rx="3"></rect>
+            <path d="M3 9.5h18"></path>
+            <path d="M8 3v4"></path>
+            <path d="M16 3v4"></path>
+            <path d="M8.5 14.5l2.5 2.5 4.5-4.5"></path>
+          </svg>
+        </span>
+        <p class="brand-tagline">Gestión de citas</p>
       </div>
       <nav class="tabs">
         <button id="tab-agenda" class="tab-btn active" type="button">Agenda</button>
         <button id="tab-clients" class="tab-btn" type="button">Clientes</button>
         <button id="tab-employees" class="tab-btn" type="button">Empleados</button>
+        <button id="tab-statistics" class="tab-btn" type="button">Estadísticas</button>
       </nav>
       <button id="btn-new-appt" class="btn btn-primary">
         <span class="btn-icon-inline">+</span> Nueva cita
@@ -83,6 +89,92 @@
           <h2>Empleados</h2>
         </div>
         <div id="employees-list" class="clients-list"></div>
+      </section>
+    </main>
+
+    <main class="stats-view hidden" id="view-statistics">
+      <section class="stats-filter-card card">
+        <div class="stats-filter-row">
+          <div id="stats-filter-presets" class="stats-filter-presets"></div>
+          <div class="stats-range-inputs">
+            <label class="stats-range-label">Desde
+              <input type="date" id="stats-range-start">
+            </label>
+            <label class="stats-range-label">Hasta
+              <input type="date" id="stats-range-end">
+            </label>
+          </div>
+        </div>
+        <p id="stats-range-summary" class="stats-range-summary"></p>
+      </section>
+
+      <div class="stats-kpi-grid">
+        <div class="stats-kpi-tile card">
+          <span class="stats-kpi-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18"></path><path d="M8 3v4"></path><path d="M16 3v4"></path></svg>
+          </span>
+          <span id="stats-kpi-total-appts" class="stats-kpi-value">0</span>
+          <span class="stats-kpi-label">Citas totales</span>
+          <span id="stats-kpi-total-appts-sub" class="stats-kpi-sub">Sin datos</span>
+        </div>
+        <div class="stats-kpi-tile card">
+          <span class="stats-kpi-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"></circle><path d="M2.5 19c0-3.3 2.9-5.5 6.5-5.5s6.5 2.2 6.5 5.5"></path><circle cx="17.5" cy="8.5" r="2.4"></circle><path d="M15.8 13.6c2.9.3 5.2 2.3 5.2 5.1"></path></svg>
+          </span>
+          <span id="stats-kpi-clients" class="stats-kpi-value">0</span>
+          <span class="stats-kpi-label">Clientes atendidos</span>
+          <span id="stats-kpi-clients-sub" class="stats-kpi-sub">Sin datos</span>
+        </div>
+        <div class="stats-kpi-tile card">
+          <span class="stats-kpi-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.8L21 9.6l-4.6 4 1.3 6.4L12 16.9l-5.7 3.1L7.6 13.6 3 9.6l6.4-.8L12 3z"></path></svg>
+          </span>
+          <span id="stats-kpi-top-service" class="stats-kpi-value">—</span>
+          <span class="stats-kpi-label">Servicio más solicitado</span>
+          <span id="stats-kpi-top-service-sub" class="stats-kpi-sub">Sin datos</span>
+        </div>
+        <div class="stats-kpi-tile card">
+          <span class="stats-kpi-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"></path><path d="M12 17v4"></path><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"></path><path d="M7 5H4a3 3 0 0 0 3 5"></path><path d="M17 5h3a3 3 0 0 1-3 5"></path></svg>
+          </span>
+          <span id="stats-kpi-top-employee" class="stats-kpi-value">—</span>
+          <span class="stats-kpi-label">Empleado con más citas</span>
+          <span id="stats-kpi-top-employee-sub" class="stats-kpi-sub">Sin datos</span>
+        </div>
+      </div>
+
+      <section class="stats-chart-card card">
+        <div class="stats-chart-header">
+          <h3>Evolución de citas</h3>
+          <button type="button" class="btn btn-ghost btn-view-toggle" data-target="timeline">Ver tabla</button>
+        </div>
+        <div id="stats-timeline-view" class="stats-chart-body"></div>
+      </section>
+
+      <div class="stats-charts-grid">
+        <section class="stats-chart-card card">
+          <div class="stats-chart-header">
+            <h3>Citas por cliente</h3>
+            <button type="button" class="btn btn-ghost btn-view-toggle" data-target="clients">Ver tabla</button>
+          </div>
+          <div id="stats-clients-view" class="stats-chart-body"></div>
+        </section>
+
+        <section class="stats-chart-card card">
+          <div class="stats-chart-header">
+            <h3>Citas por empleado</h3>
+            <button type="button" class="btn btn-ghost btn-view-toggle" data-target="employees">Ver tabla</button>
+          </div>
+          <div id="stats-employees-view" class="stats-chart-body"></div>
+        </section>
+      </div>
+
+      <section class="stats-chart-card card">
+        <div class="stats-chart-header">
+          <h3>Servicios más solicitados</h3>
+          <button type="button" class="btn btn-ghost btn-view-toggle" data-target="services">Ver tabla</button>
+        </div>
+        <div id="stats-services-view" class="stats-chart-body"></div>
       </section>
     </main>
   </div>
@@ -294,13 +386,14 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script src="js/store.js?v=6"></script>
-  <script src="js/countries.js?v=6"></script>
-  <script src="js/calendar.js?v=6"></script>
-  <script src="js/schedule.js?v=6"></script>
-  <script src="js/appointments.js?v=6"></script>
-  <script src="js/clients.js?v=6"></script>
-  <script src="js/employees.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/store.js?v=9"></script>
+  <script src="js/countries.js?v=9"></script>
+  <script src="js/calendar.js?v=9"></script>
+  <script src="js/schedule.js?v=9"></script>
+  <script src="js/appointments.js?v=9"></script>
+  <script src="js/clients.js?v=9"></script>
+  <script src="js/employees.js?v=9"></script>
+  <script src="js/statistics.js?v=9"></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>

@@ -45,6 +45,9 @@ const Appointments = {
       if (!document.getElementById('confirm-overlay').classList.contains('hidden')) this.closeConfirm();
       else if (!document.getElementById('modal-overlay').classList.contains('hidden')) this.closeForm();
     });
+
+    // Mantiene los colores de estado (verde/rojo) al día mientras la vista está abierta
+    setInterval(() => this.renderList(Calendar.selectedDate), 60000);
   },
 
   populatePhoneCodeSelect() {
@@ -390,8 +393,9 @@ const Appointments = {
     list.innerHTML = '';
     appts.forEach(appt => {
       const employee = employees.find(e => e.id === appt.employeeId);
+      const overdue = isApptOverdue(appt.date, appt.time);
       const item = document.createElement('div');
-      item.className = 'appt-item';
+      item.className = `appt-item ${overdue ? 'appt-item-overdue' : 'appt-item-upcoming'}`;
       item.innerHTML = `
         <div class="appt-time">${escapeHtml(appt.time)}</div>
         <div class="appt-info">
@@ -411,6 +415,21 @@ const Appointments = {
     });
   }
 };
+
+const APPT_OVERDUE_GRACE_MINUTES = 15;
+
+/* Una cita se considera "pasada" si su fecha ya quedó atrás, o si es hoy pero
+   su hora ya pasó hace más de 15 minutos. En cualquier otro caso se muestra
+   como al día (verde). */
+function isApptOverdue(dateStr, timeStr) {
+  const now = new Date();
+  const todayStr = toISODate(now);
+  if (dateStr < todayStr) return true;
+  if (dateStr > todayStr) return false;
+  const apptMinutes = timeToMinutes(timeStr);
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  return nowMinutes - apptMinutes > APPT_OVERDUE_GRACE_MINUTES;
+}
 
 function formatScheduleRanges(ranges) {
   return ranges.map(r => `${r.open}–${r.close}`).join(' y ');
