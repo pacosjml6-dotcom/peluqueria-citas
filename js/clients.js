@@ -107,6 +107,15 @@ const Clients = {
 
     if (id) {
       ClientStore.update(id, data);
+      Store.updateByClientId(id, {
+        name,
+        dialCode,
+        phoneLocal: phoneLocalRaw,
+        phone: fullPhone,
+        email,
+      });
+      Calendar.render();
+      Appointments.renderList(Calendar.selectedDate);
       showToast('Cliente actualizado correctamente', 'success');
     } else {
       ClientStore.create(data);

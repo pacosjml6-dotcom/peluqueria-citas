@@ -1,8 +1,13 @@
 /* CRUD de citas: modal de formulario, confirmación de borrado y lista del día */
+const CONFLICT_WINDOW_MINUTES = 20;
+const SLOT_INTERVAL_MINUTES = 15;
+
 const Appointments = {
   pendingDeleteId: null,
 
   init() {
+    this.populatePhoneCodeSelect();
+
     document.getElementById('btn-new-appt').addEventListener('click', () => {
       this.openForm(null, Calendar.selectedDate);
     });
@@ -14,6 +19,20 @@ const Appointments = {
     });
     document.getElementById('btn-confirm-cancel').addEventListener('click', () => this.closeConfirm());
     document.getElementById('btn-confirm-delete').addEventListener('click', () => this.confirmDelete());
+
+    document.getElementById('appt-phone-code').addEventListener('change', () => this.tryAutoFillFromContact());
+    document.getElementById('appt-phone').addEventListener('input', () => this.tryAutoFillFromContact());
+    document.getElementById('appt-phone').addEventListener('blur', () => this.tryAutoFillFromContact());
+    document.getElementById('appt-email').addEventListener('input', () => this.tryAutoFillFromContact());
+    document.getElementById('appt-email').addEventListener('blur', () => this.tryAutoFillFromContact());
+    document.getElementById('appt-name').addEventListener('change', () => this.tryAutoFillFromName());
+
+    document.getElementById('appt-employee').addEventListener('change', () => this.checkEmployeeConflict());
+    document.getElementById('appt-date').addEventListener('change', () => {
+      this.populateTimeSelect(document.getElementById('appt-date').value);
+      this.checkEmployeeConflict();
+    });
+    document.getElementById('appt-time').addEventListener('change', () => this.checkEmployeeConflict());
 
     document.getElementById('modal-overlay').addEventListener('click', (e) => {
       if (e.target.id === 'modal-overlay') this.closeForm();
@@ -28,28 +47,210 @@ const Appointments = {
     });
   },
 
+  populatePhoneCodeSelect() {
+    const select = document.getElementById('appt-phone-code');
+    const sorted = [...COUNTRY_CODES].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    select.innerHTML = sorted
+      .map(c => `<option value="${c.dial}" data-iso="${c.iso}">${isoToFlagEmoji(c.iso)} +${c.dial} ${escapeHtml(c.name)}</option>`)
+      .join('');
+    select.value = '34';
+  },
+
+  populateClientsDatalist() {
+    const datalist = document.getElementById('appt-clients-datalist');
+    datalist.innerHTML = ClientStore.getAll()
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+      .map(c => `<option value="${escapeHtml(c.name)}">`)
+      .join('');
+  },
+
+  populateEmployeeSelect() {
+    const select = document.getElementById('appt-employee');
+    const hint = document.getElementById('appt-employee-hint');
+    const employees = EmployeeStore.getAll().sort((a, b) => a.name.localeCompare(b.name, 'es'));
+
+    if (employees.length === 0) {
+      select.innerHTML = '<option value="">No hay empleados dados de alta</option>';
+      select.disabled = true;
+      hint.textContent = 'No hay empleados dados de alta todavía. Añade uno primero en la pestaña "Empleados".';
+      hint.classList.remove('hidden');
+    } else {
+      select.disabled = false;
+      select.innerHTML = '<option value="">Selecciona un empleado</option>' +
+        employees.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('');
+      hint.classList.add('hidden');
+      hint.textContent = '';
+    }
+  },
+
+  setClientHint(text) {
+    const hint = document.getElementById('appt-client-hint');
+    if (text) {
+      hint.textContent = text;
+      hint.classList.remove('hidden');
+    } else {
+      hint.textContent = '';
+      hint.classList.add('hidden');
+    }
+  },
+
+  tryAutoFillFromContact() {
+    const dialCode = document.getElementById('appt-phone-code').value;
+    const phoneDigits = document.getElementById('appt-phone').value.trim().replace(/\D/g, '');
+    const email = document.getElementById('appt-email').value.trim();
+    let match = null;
+
+    if (phoneDigits) {
+      match = ClientStore.findByPhone(`+${dialCode}${phoneDigits}`);
+    }
+    if (!match && email) {
+      match = ClientStore.findByEmail(email);
+    }
+
+    if (match) {
+      document.getElementById('appt-name').value = match.name;
+      this.setClientHint(`Cliente ya registrado: se usará el nombre "${match.name}".`);
+    } else {
+      this.setClientHint('');
+    }
+  },
+
+  tryAutoFillFromName() {
+    const name = document.getElementById('appt-name').value.trim();
+    if (!name) return;
+    const match = ClientStore.findByName(name);
+    if (match) {
+      document.getElementById('appt-phone-code').value = match.dialCode;
+      document.getElementById('appt-phone').value = match.phoneLocal;
+      document.getElementById('appt-email').value = match.email;
+      this.setClientHint('Cliente ya registrado: se han rellenado sus datos de contacto.');
+    }
+  },
+
+  populateTimeSelect(dateStr, keepTime) {
+    const select = document.getElementById('appt-time');
+    const previous = keepTime !== undefined ? keepTime : select.value;
+    const schedule = dateStr ? ScheduleStore.getForDate(dateStr) : null;
+    const ranges = schedule && !schedule.closed ? ScheduleStore.getRanges(schedule) : [];
+
+    if (!dateStr || !schedule || schedule.closed || ranges.length === 0) {
+      select.innerHTML = '<option value="">-- Sin horas disponibles --</option>';
+      select.value = '';
+      return;
+    }
+
+    const slots = [];
+    ranges.forEach(range => {
+      for (let t = timeToMinutes(range.open); t < timeToMinutes(range.close); t += SLOT_INTERVAL_MINUTES) {
+        slots.push(minutesToTime(t));
+      }
+    });
+
+    let optionsHtml = '<option value="">Selecciona una hora</option>' +
+      slots.map(s => `<option value="${s}">${s}</option>`).join('');
+
+    if (previous && !slots.includes(previous)) {
+      optionsHtml += `<option value="${previous}">${previous} (fuera de horario)</option>`;
+    }
+
+    select.innerHTML = optionsHtml;
+    select.value = previous || '';
+  },
+
+  getScheduleIssue(date, time) {
+    if (!date) return null;
+    const schedule = ScheduleStore.getForDate(date);
+    if (!schedule) return null;
+    const ranges = schedule.closed ? [] : ScheduleStore.getRanges(schedule);
+    if (schedule.closed || ranges.length === 0) return { type: 'closed' };
+    if (!time) return null;
+    const t = timeToMinutes(time);
+    const withinRange = ranges.some(r => t >= timeToMinutes(r.open) && t < timeToMinutes(r.close));
+    if (!withinRange) return { type: 'outside', ranges };
+    return null;
+  },
+
+  findConflict(employeeId, date, time, excludeApptId) {
+    if (!employeeId || !date || !time) return null;
+    const target = timeToMinutes(time);
+    return Store.getByDate(date).find(a => {
+      if (a.employeeId !== employeeId) return false;
+      if (excludeApptId && a.id === excludeApptId) return false;
+      return Math.abs(timeToMinutes(a.time) - target) < CONFLICT_WINDOW_MINUTES;
+    }) || null;
+  },
+
+  checkEmployeeConflict() {
+    const employeeId = document.getElementById('appt-employee').value;
+    const date = document.getElementById('appt-date').value;
+    const time = document.getElementById('appt-time').value;
+    const excludeId = document.getElementById('appt-id').value;
+    const warningEl = document.getElementById('appt-employee-warning');
+    const saveBtn = document.getElementById('btn-save-appt');
+
+    const scheduleIssue = this.getScheduleIssue(date, time);
+    if (scheduleIssue) {
+      warningEl.textContent = scheduleIssue.type === 'closed'
+        ? '⚠️ El establecimiento está cerrado ese día. Elige otra fecha.'
+        : `⚠️ Esa hora está fuera del horario laboral (${formatScheduleRanges(scheduleIssue.ranges)}). Elige una hora dentro de ese horario.`;
+      warningEl.classList.remove('hidden');
+      saveBtn.disabled = true;
+      return true;
+    }
+
+    const conflict = this.findConflict(employeeId, date, time, excludeId);
+
+    if (conflict) {
+      const employee = EmployeeStore.getAll().find(e => e.id === employeeId);
+      const employeeName = employee ? employee.name : 'Este empleado';
+      const before = minutesToTime(timeToMinutes(conflict.time) - CONFLICT_WINDOW_MINUTES);
+      const after = minutesToTime(timeToMinutes(conflict.time) + CONFLICT_WINDOW_MINUTES);
+      warningEl.textContent = `⚠️ ${employeeName} ya tiene una cita a las ${conflict.time} ese día. Elige otro empleado o una hora antes de las ${before} o después de las ${after}.`;
+      warningEl.classList.remove('hidden');
+      saveBtn.disabled = true;
+      return true;
+    }
+
+    warningEl.classList.add('hidden');
+    warningEl.textContent = '';
+    saveBtn.disabled = false;
+    return false;
+  },
+
   openForm(appt = null, presetDate = null) {
     const form = document.getElementById('appt-form');
     form.reset();
     document.getElementById('appt-id').value = '';
     document.getElementById('btn-delete-appt').classList.add('hidden');
     document.getElementById('modal-title').textContent = 'Nueva cita';
+    document.getElementById('appt-phone-code').value = '34';
+    document.getElementById('btn-save-appt').disabled = false;
+    this.setClientHint('');
+    document.getElementById('appt-employee-warning').classList.add('hidden');
+
+    this.populateClientsDatalist();
+    this.populateEmployeeSelect();
 
     if (appt) {
       document.getElementById('modal-title').textContent = 'Editar cita';
       document.getElementById('appt-id').value = appt.id;
       document.getElementById('appt-name').value = appt.name;
-      document.getElementById('appt-phone').value = appt.phone;
+      document.getElementById('appt-phone-code').value = appt.dialCode || '34';
+      document.getElementById('appt-phone').value = appt.phoneLocal || appt.phone;
+      document.getElementById('appt-email').value = appt.email || '';
+      document.getElementById('appt-employee').value = appt.employeeId || '';
       document.getElementById('appt-date').value = appt.date;
-      document.getElementById('appt-time').value = appt.time;
       document.getElementById('appt-notes').value = appt.notes || '';
       document.getElementById('btn-delete-appt').classList.remove('hidden');
     } else if (presetDate) {
       document.getElementById('appt-date').value = presetDate;
     }
 
+    this.populateTimeSelect(document.getElementById('appt-date').value, appt ? appt.time : '');
+
     document.getElementById('modal-overlay').classList.remove('hidden');
     document.getElementById('appt-name').focus();
+    this.checkEmployeeConflict();
   },
 
   closeForm() {
@@ -59,18 +260,78 @@ const Appointments = {
   handleSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('appt-id').value;
-    const data = {
-      name: document.getElementById('appt-name').value.trim(),
-      phone: document.getElementById('appt-phone').value.trim(),
-      date: document.getElementById('appt-date').value,
-      time: document.getElementById('appt-time').value,
-      notes: document.getElementById('appt-notes').value.trim(),
-    };
+    const name = document.getElementById('appt-name').value.trim();
+    const dialCode = document.getElementById('appt-phone-code').value;
+    const phoneLocalRaw = document.getElementById('appt-phone').value.trim();
+    const email = document.getElementById('appt-email').value.trim();
+    const employeeId = document.getElementById('appt-employee').value;
+    const date = document.getElementById('appt-date').value;
+    const time = document.getElementById('appt-time').value;
+    const notes = document.getElementById('appt-notes').value.trim();
 
-    if (!data.name || !data.phone || !data.date || !data.time) {
+    if (!name || !phoneLocalRaw || !email || !employeeId || !date || !time) {
       showToast('Completa todos los campos obligatorios', 'error');
       return;
     }
+
+    const phoneDigits = phoneLocalRaw.replace(/\D/g, '');
+    if (!phoneDigits) {
+      showToast('Introduce un teléfono válido', 'error');
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      showToast('Introduce un correo electrónico válido', 'error');
+      return;
+    }
+
+    const scheduleIssue = this.getScheduleIssue(date, time);
+    if (scheduleIssue) {
+      this.checkEmployeeConflict();
+      showToast(
+        scheduleIssue.type === 'closed'
+          ? 'El establecimiento está cerrado ese día. Elige otra fecha.'
+          : 'Esa hora está fuera del horario laboral. Elige una hora dentro del horario configurado.',
+        'error'
+      );
+      return;
+    }
+
+    if (this.findConflict(employeeId, date, time, id)) {
+      this.checkEmployeeConflict();
+      showToast('Ese empleado ya tiene otra cita dentro de un margen de 20 minutos. Elige otra hora u otro empleado.', 'error');
+      return;
+    }
+
+    const fullPhone = `+${dialCode}${phoneDigits}`;
+    const existingClient = ClientStore.findByPhone(fullPhone) || ClientStore.findByEmail(email);
+
+    let clientId;
+    let finalName;
+
+    if (existingClient) {
+      // La ficha del cliente manda: el nombre de la cita siempre refleja el suyo, nunca al revés.
+      clientId = existingClient.id;
+      finalName = existingClient.name;
+    } else {
+      const newClient = ClientStore.create({ name, dialCode, phoneLocal: phoneLocalRaw, fullPhone, email });
+      clientId = newClient.id;
+      finalName = newClient.name;
+    }
+
+    const data = {
+      name: finalName,
+      phone: fullPhone,
+      dialCode,
+      phoneLocal: phoneLocalRaw,
+      email,
+      employeeId,
+      clientId,
+      date,
+      time,
+      notes,
+    };
 
     if (id) {
       Store.update(id, data);
@@ -124,8 +385,11 @@ const Appointments = {
       return;
     }
 
+    const employees = EmployeeStore.getAll();
+
     list.innerHTML = '';
     appts.forEach(appt => {
+      const employee = employees.find(e => e.id === appt.employeeId);
       const item = document.createElement('div');
       item.className = 'appt-item';
       item.innerHTML = `
@@ -134,6 +398,7 @@ const Appointments = {
           <div class="appt-name">${escapeHtml(appt.name)}</div>
           <div class="appt-notes">${escapeHtml(appt.notes || 'Sin notas')}</div>
           <div class="appt-phone">${escapeHtml(appt.phone)}</div>
+          ${employee ? `<div class="appt-employee">Atiende: ${escapeHtml(employee.name)}</div>` : ''}
         </div>
         <div class="appt-actions">
           <button class="btn-icon btn-edit" aria-label="Editar cita" title="Editar">&#9998;</button>
@@ -146,6 +411,22 @@ const Appointments = {
     });
   }
 };
+
+function formatScheduleRanges(ranges) {
+  return ranges.map(r => `${r.open}–${r.close}`).join(' y ');
+}
+
+function timeToMinutes(time) {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function minutesToTime(total) {
+  const clamped = ((total % 1440) + 1440) % 1440;
+  const h = Math.floor(clamped / 60);
+  const m = clamped % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
 
 function formatDate(iso) {
   const [y, m, d] = iso.split('-').map(Number);

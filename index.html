@@ -23,6 +23,7 @@
       <nav class="tabs">
         <button id="tab-agenda" class="tab-btn active" type="button">Agenda</button>
         <button id="tab-clients" class="tab-btn" type="button">Clientes</button>
+        <button id="tab-employees" class="tab-btn" type="button">Empleados</button>
       </nav>
       <button id="btn-new-appt" class="btn btn-primary">
         <span class="btn-icon-inline">+</span> Nueva cita
@@ -30,20 +31,33 @@
       <button id="btn-new-client" class="btn btn-primary hidden">
         <span class="btn-icon-inline">+</span> Nuevo cliente
       </button>
+      <button id="btn-new-employee" class="btn btn-primary hidden">
+        <span class="btn-icon-inline">+</span> Nuevo empleado
+      </button>
     </header>
 
     <main class="app-main" id="view-agenda">
-      <section class="calendar-card card">
-        <div class="calendar-header">
-          <button id="btn-prev-month" class="btn-icon" aria-label="Mes anterior">&#8249;</button>
-          <h2 id="calendar-title">Mes</h2>
-          <button id="btn-next-month" class="btn-icon" aria-label="Mes siguiente">&#8250;</button>
-        </div>
-        <div class="calendar-weekdays">
-          <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
-        </div>
-        <div id="calendar-grid" class="calendar-grid"></div>
-      </section>
+      <div class="agenda-col-left">
+        <section class="calendar-card card">
+          <div class="calendar-header">
+            <button id="btn-prev-month" class="btn-icon" aria-label="Mes anterior">&#8249;</button>
+            <h2 id="calendar-title">Mes</h2>
+            <button id="btn-next-month" class="btn-icon" aria-label="Mes siguiente">&#8250;</button>
+          </div>
+          <div class="calendar-weekdays">
+            <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+          </div>
+          <div id="calendar-grid" class="calendar-grid"></div>
+        </section>
+
+        <section class="schedule-card card">
+          <div class="schedule-header">
+            <h2>Horario laboral</h2>
+            <button id="btn-edit-schedule" class="btn btn-ghost" type="button">Configurar</button>
+          </div>
+          <div id="schedule-summary" class="schedule-summary"></div>
+        </section>
+      </div>
 
       <section class="agenda-card card">
         <div class="agenda-header">
@@ -62,6 +76,15 @@
         <div id="clients-list" class="clients-list"></div>
       </section>
     </main>
+
+    <main class="clients-view hidden" id="view-employees">
+      <section class="clients-card card">
+        <div class="clients-header">
+          <h2>Empleados</h2>
+        </div>
+        <div id="employees-list" class="clients-list"></div>
+      </section>
+    </main>
   </div>
 
   <div id="modal-overlay" class="modal-overlay hidden">
@@ -73,17 +96,46 @@
       <form id="appt-form" class="appt-form">
         <input type="hidden" id="appt-id">
         <label>Nombre del cliente
-          <input type="text" id="appt-name" required placeholder="Ej. Laura Gómez">
+          <input type="text" id="appt-name" required maxlength="120" list="appt-clients-datalist" placeholder="Ej. Laura Gómez" autocomplete="off">
+          <datalist id="appt-clients-datalist"></datalist>
         </label>
-        <label>Teléfono de contacto
-          <input type="tel" id="appt-phone" required placeholder="Ej. 600 123 456">
+        <p id="appt-client-hint" class="field-hint hidden"></p>
+        <label>
+          <span class="field-icons-row">
+            <span class="field-icon" title="Teléfono" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.9 21 3 13.1 3 3c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1.1L6.6 10.8z"/></svg>
+            </span>
+          </span>
+          Teléfono
+          <div class="phone-row">
+            <select id="appt-phone-code" class="phone-code-select" aria-label="Prefijo del país"></select>
+            <input type="tel" id="appt-phone" required placeholder="600 123 456">
+          </div>
         </label>
+        <label>
+          <span class="field-icons-row">
+            <span class="field-icon" title="Correo electrónico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v.2l8 5.3 8-5.3V6H4zm16 12V8.6l-7.4 4.9a1 1 0 0 1-1.2 0L4 8.6V18h16z"/></svg>
+            </span>
+          </span>
+          Correo electrónico
+          <input type="email" id="appt-email" required placeholder="Ej. laura@email.com">
+        </label>
+        <label>Empleado que atenderá
+          <select id="appt-employee" required>
+            <option value="">Selecciona un empleado</option>
+          </select>
+        </label>
+        <p id="appt-employee-hint" class="field-warning hidden"></p>
+        <p id="appt-employee-warning" class="field-warning hidden"></p>
         <div class="form-row">
           <label>Fecha
             <input type="date" id="appt-date" required>
           </label>
           <label>Hora
-            <input type="time" id="appt-time" required>
+            <select id="appt-time" required>
+              <option value="">Selecciona primero una fecha</option>
+            </select>
           </label>
         </div>
         <label>Servicio / Notas
@@ -93,7 +145,7 @@
           <button type="button" id="btn-delete-appt" class="btn btn-danger hidden">Eliminar</button>
           <div class="form-actions-right">
             <button type="button" id="btn-cancel-form" class="btn btn-ghost">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="submit" id="btn-save-appt" class="btn btn-primary">Guardar</button>
           </div>
         </div>
       </form>
@@ -168,13 +220,87 @@
     </div>
   </div>
 
+  <div id="employee-modal-overlay" class="modal-overlay hidden">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="employee-modal-title">
+      <div class="modal-header">
+        <h3 id="employee-modal-title">Nuevo empleado</h3>
+        <button id="btn-close-employee-modal" class="btn-icon" aria-label="Cerrar">&times;</button>
+      </div>
+      <form id="employee-form" class="appt-form">
+        <input type="hidden" id="employee-id">
+
+        <div class="avatar-picker-wrap">
+          <label class="avatar-picker" for="employee-photo-input" title="Cambiar foto">
+            <img id="employee-photo-preview" class="avatar-picker-img hidden" alt="">
+            <span id="employee-photo-placeholder" class="avatar-picker-placeholder" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5z"/></svg>
+            </span>
+            <span class="avatar-picker-overlay" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M9 3L7.2 5H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.2L15 3H9zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
+            </span>
+          </label>
+          <input type="file" id="employee-photo-input" accept="image/*" class="hidden">
+          <button type="button" id="btn-remove-employee-photo" class="btn btn-ghost btn-remove-photo hidden">Quitar foto</button>
+        </div>
+
+        <label>Nombre completo
+          <input type="text" id="employee-name" required maxlength="120" placeholder="Ej. Marta Sánchez Ruiz">
+        </label>
+
+        <div id="employee-appointments-section" class="employee-appts-section hidden">
+          <h4>Citas asignadas</h4>
+          <p class="employee-appts-placeholder">Próximamente podrás ver aquí las citas asignadas a este empleado.</p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="btn-delete-employee" class="btn btn-danger hidden">Eliminar</button>
+          <div class="form-actions-right">
+            <button type="button" id="btn-cancel-employee-form" class="btn btn-ghost">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="employee-confirm-overlay" class="modal-overlay hidden">
+    <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="employee-confirm-title">
+      <h3 id="employee-confirm-title">¿Eliminar empleado?</h3>
+      <p id="employee-confirm-message" class="confirm-message"></p>
+      <div class="form-actions">
+        <button id="btn-employee-confirm-cancel" class="btn btn-ghost">Cancelar</button>
+        <button id="btn-employee-confirm-delete" class="btn btn-danger">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="schedule-modal-overlay" class="modal-overlay hidden">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="schedule-modal-title">
+      <div class="modal-header">
+        <h3 id="schedule-modal-title">Horario laboral</h3>
+        <button id="btn-close-schedule-modal" class="btn-icon" aria-label="Cerrar">&times;</button>
+      </div>
+      <form id="schedule-form" class="appt-form">
+        <div id="schedule-days-list" class="schedule-days-list"></div>
+        <div class="form-actions">
+          <div class="form-actions-right">
+            <button type="button" id="btn-cancel-schedule-form" class="btn btn-ghost">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="toast" class="toast hidden"></div>
 
-  <script src="js/store.js"></script>
-  <script src="js/countries.js"></script>
-  <script src="js/calendar.js"></script>
-  <script src="js/appointments.js"></script>
-  <script src="js/clients.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/store.js?v=6"></script>
+  <script src="js/countries.js?v=6"></script>
+  <script src="js/calendar.js?v=6"></script>
+  <script src="js/schedule.js?v=6"></script>
+  <script src="js/appointments.js?v=6"></script>
+  <script src="js/clients.js?v=6"></script>
+  <script src="js/employees.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 </html>

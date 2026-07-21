@@ -126,6 +126,12 @@ button {
   padding: 22px;
 }
 
+.agenda-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 /* ==========================================================================
    Botones
    ========================================================================== */
@@ -150,6 +156,12 @@ button {
 }
 
 .btn-primary:hover { box-shadow: 0 8px 22px rgba(184, 134, 11, 0.42); }
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
 
 .btn-ghost {
   background: transparent;
@@ -400,6 +412,13 @@ button {
   color: var(--color-text-muted);
 }
 
+.appt-employee {
+  font-size: 12px;
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
 .appt-actions {
   display: flex;
   gap: 6px;
@@ -409,6 +428,128 @@ button {
   width: 30px;
   height: 30px;
   font-size: 14px;
+}
+
+/* ==========================================================================
+   Horario laboral
+   ========================================================================== */
+.schedule-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.schedule-header h2 {
+  font-size: 18px;
+}
+
+.schedule-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schedule-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  font-size: 13px;
+}
+
+.schedule-summary-day {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.schedule-summary-hours {
+  display: flex;
+  gap: 14px;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.schedule-summary-shift {
+  white-space: nowrap;
+}
+
+.schedule-summary-shift strong {
+  color: var(--color-text);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.schedule-days-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.schedule-day-row {
+  display: grid;
+  grid-template-columns: 90px auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+}
+
+.schedule-day-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.schedule-closed-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.schedule-shifts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.schedule-shift {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.schedule-shift-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  min-width: 46px;
+}
+
+.schedule-shift input {
+  padding: 6px 8px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  width: 100px;
+}
+
+.schedule-shift input:disabled {
+  opacity: 0.4;
 }
 
 /* ==========================================================================
@@ -640,6 +781,26 @@ button {
   min-width: 0;
 }
 
+.field-hint {
+  font-size: 12px;
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  margin: -6px 0 0;
+}
+
+.field-warning {
+  font-size: 13px;
+  color: var(--color-danger);
+  background: var(--color-danger-light);
+  border: 1px solid var(--color-danger);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  margin: -6px 0 0;
+  line-height: 1.4;
+}
+
 .form-actions {
   display: flex;
   align-items: center;
@@ -651,6 +812,100 @@ button {
   display: flex;
   gap: 10px;
   margin-left: auto;
+}
+
+/* ==========================================================================
+   Empleados: selector de foto circular
+   ========================================================================== */
+.avatar-picker-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.avatar-picker {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-surface-alt);
+  border: 2px dashed var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: border-color var(--transition);
+}
+
+.avatar-picker:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.avatar-picker-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-picker-placeholder {
+  display: flex;
+}
+
+.avatar-picker-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(43, 36, 32, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.avatar-picker:hover .avatar-picker-overlay {
+  opacity: 1;
+}
+
+.btn-remove-photo {
+  font-size: 12px;
+  padding: 6px 14px;
+}
+
+.employee-appts-section {
+  background: var(--color-surface-alt);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.employee-appts-section h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.employee-appts-placeholder {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+.employee-avatar {
+  overflow: hidden;
+  padding: 0;
+}
+
+.employee-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 /* ==========================================================================
@@ -695,4 +950,8 @@ button {
   .modal { padding: 18px; }
   .phone-row { flex-direction: column; }
   .phone-code-select { width: 100%; max-width: none; }
+  .schedule-day-row { grid-template-columns: 1fr; gap: 6px; }
+  .schedule-shift { justify-content: flex-start; }
+  .schedule-summary-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .schedule-summary-hours { flex-wrap: wrap; text-align: left; }
 }
