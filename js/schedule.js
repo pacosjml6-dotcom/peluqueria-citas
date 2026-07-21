@@ -90,7 +90,7 @@ const Schedule = {
     document.getElementById('schedule-modal-overlay').classList.add('hidden');
   },
 
-  handleSubmit(e) {
+  async handleSubmit(e) {
     e.preventDefault();
     const rows = document.querySelectorAll('.schedule-day-row');
     const schedule = [];
@@ -135,15 +135,25 @@ const Schedule = {
       });
     }
 
-    ScheduleStore.save(schedule);
-    this.renderSummary();
-    this.closeForm();
-    showToast('Horario laboral actualizado correctamente', 'success');
+    const submitBtn = e.submitter || e.target.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
 
-    const dateInput = document.getElementById('appt-date');
-    if (dateInput && dateInput.value && !document.getElementById('modal-overlay').classList.contains('hidden')) {
-      Appointments.populateTimeSelect(dateInput.value);
-      Appointments.checkEmployeeConflict();
+    try {
+      await ScheduleStore.save(schedule);
+      this.renderSummary();
+      this.closeForm();
+      showToast('Horario laboral actualizado correctamente', 'success');
+
+      const dateInput = document.getElementById('appt-date');
+      if (dateInput && dateInput.value && !document.getElementById('modal-overlay').classList.contains('hidden')) {
+        Appointments.populateTimeSelect(dateInput.value);
+        Appointments.checkEmployeeConflict();
+      }
+    } catch (err) {
+      console.error('Error guardando el horario', err);
+      showToast('No se pudo guardar el horario. Comprueba tu conexión e inténtalo de nuevo.', 'error');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
     }
   },
 

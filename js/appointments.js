@@ -260,7 +260,7 @@ const Appointments = {
     document.getElementById('modal-overlay').classList.add('hidden');
   },
 
-  handleSubmit(e) {
+  async handleSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('appt-id').value;
     const name = document.getElementById('appt-name').value.trim();
@@ -310,44 +310,54 @@ const Appointments = {
     const fullPhone = `+${dialCode}${phoneDigits}`;
     const existingClient = ClientStore.findByPhone(fullPhone) || ClientStore.findByEmail(email);
 
-    let clientId;
-    let finalName;
+    const saveBtn = document.getElementById('btn-save-appt');
+    saveBtn.disabled = true;
 
-    if (existingClient) {
-      // La ficha del cliente manda: el nombre de la cita siempre refleja el suyo, nunca al revés.
-      clientId = existingClient.id;
-      finalName = existingClient.name;
-    } else {
-      const newClient = ClientStore.create({ name, dialCode, phoneLocal: phoneLocalRaw, fullPhone, email });
-      clientId = newClient.id;
-      finalName = newClient.name;
+    try {
+      let clientId;
+      let finalName;
+
+      if (existingClient) {
+        // La ficha del cliente manda: el nombre de la cita siempre refleja el suyo, nunca al revés.
+        clientId = existingClient.id;
+        finalName = existingClient.name;
+      } else {
+        const newClient = await ClientStore.create({ name, dialCode, phoneLocal: phoneLocalRaw, fullPhone, email });
+        clientId = newClient.id;
+        finalName = newClient.name;
+      }
+
+      const data = {
+        name: finalName,
+        phone: fullPhone,
+        dialCode,
+        phoneLocal: phoneLocalRaw,
+        email,
+        employeeId,
+        clientId,
+        date,
+        time,
+        notes,
+      };
+
+      if (id) {
+        await Store.update(id, data);
+        showToast('Cita actualizada correctamente', 'success');
+      } else {
+        await Store.create(data);
+        showToast('Cita creada correctamente', 'success');
+      }
+
+      this.closeForm();
+      Calendar.selectedDate = data.date;
+      Calendar.render();
+      this.renderList(data.date);
+    } catch (err) {
+      console.error('Error guardando la cita', err);
+      showToast('No se pudo guardar la cita. Comprueba tu conexión e inténtalo de nuevo.', 'error');
+    } finally {
+      saveBtn.disabled = false;
     }
-
-    const data = {
-      name: finalName,
-      phone: fullPhone,
-      dialCode,
-      phoneLocal: phoneLocalRaw,
-      email,
-      employeeId,
-      clientId,
-      date,
-      time,
-      notes,
-    };
-
-    if (id) {
-      Store.update(id, data);
-      showToast('Cita actualizada correctamente', 'success');
-    } else {
-      Store.create(data);
-      showToast('Cita creada correctamente', 'success');
-    }
-
-    this.closeForm();
-    Calendar.selectedDate = data.date;
-    Calendar.render();
-    this.renderList(data.date);
   },
 
   askDelete(id) {
@@ -364,15 +374,20 @@ const Appointments = {
     this.pendingDeleteId = null;
   },
 
-  confirmDelete() {
+  async confirmDelete() {
     if (!this.pendingDeleteId) return;
     const appt = Store.getAll().find(a => a.id === this.pendingDeleteId);
-    Store.remove(this.pendingDeleteId);
-    this.closeConfirm();
-    this.closeForm();
-    showToast('Cita eliminada', 'success');
-    Calendar.render();
-    this.renderList(appt ? appt.date : Calendar.selectedDate);
+    try {
+      await Store.remove(this.pendingDeleteId);
+      this.closeConfirm();
+      this.closeForm();
+      showToast('Cita eliminada', 'success');
+      Calendar.render();
+      this.renderList(appt ? appt.date : Calendar.selectedDate);
+    } catch (err) {
+      console.error('Error eliminando la cita', err);
+      showToast('No se pudo eliminar la cita. Inténtalo de nuevo.', 'error');
+    }
   },
 
   renderList(dateStr) {

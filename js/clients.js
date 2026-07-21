@@ -65,7 +65,7 @@ const Clients = {
     document.getElementById('client-modal-overlay').classList.add('hidden');
   },
 
-  handleSubmit(e) {
+  async handleSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('client-id').value;
     const name = document.getElementById('client-name').value.trim();
@@ -104,26 +104,35 @@ const Clients = {
     }
 
     const data = { name, dialCode, phoneLocal: phoneLocalRaw, fullPhone, email };
+    const submitBtn = e.submitter || e.target.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
 
-    if (id) {
-      ClientStore.update(id, data);
-      Store.updateByClientId(id, {
-        name,
-        dialCode,
-        phoneLocal: phoneLocalRaw,
-        phone: fullPhone,
-        email,
-      });
-      Calendar.render();
-      Appointments.renderList(Calendar.selectedDate);
-      showToast('Cliente actualizado correctamente', 'success');
-    } else {
-      ClientStore.create(data);
-      showToast('Cliente añadido correctamente', 'success');
+    try {
+      if (id) {
+        await ClientStore.update(id, data);
+        await Store.updateByClientId(id, {
+          name,
+          dialCode,
+          phoneLocal: phoneLocalRaw,
+          phone: fullPhone,
+          email,
+        });
+        Calendar.render();
+        Appointments.renderList(Calendar.selectedDate);
+        showToast('Cliente actualizado correctamente', 'success');
+      } else {
+        await ClientStore.create(data);
+        showToast('Cliente añadido correctamente', 'success');
+      }
+
+      this.closeForm();
+      this.renderList();
+    } catch (err) {
+      console.error('Error guardando el cliente', err);
+      showToast('No se pudo guardar el cliente. Comprueba tu conexión e inténtalo de nuevo.', 'error');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
     }
-
-    this.closeForm();
-    this.renderList();
   },
 
   askDelete(id) {
@@ -140,13 +149,18 @@ const Clients = {
     this.pendingDeleteId = null;
   },
 
-  confirmDelete() {
+  async confirmDelete() {
     if (!this.pendingDeleteId) return;
-    ClientStore.remove(this.pendingDeleteId);
-    this.closeConfirm();
-    this.closeForm();
-    showToast('Cliente eliminado', 'success');
-    this.renderList();
+    try {
+      await ClientStore.remove(this.pendingDeleteId);
+      this.closeConfirm();
+      this.closeForm();
+      showToast('Cliente eliminado', 'success');
+      this.renderList();
+    } catch (err) {
+      console.error('Error eliminando el cliente', err);
+      showToast('No se pudo eliminar el cliente. Inténtalo de nuevo.', 'error');
+    }
   },
 
   renderList() {

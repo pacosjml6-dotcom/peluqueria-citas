@@ -42,6 +42,53 @@
 
 * { box-sizing: border-box; }
 
+.app-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  text-align: center;
+  padding: 24px;
+}
+
+.app-loading-overlay.hidden {
+  display: none;
+}
+
+.app-loading-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--color-primary-light);
+  border-top-color: var(--color-primary);
+  animation: app-loading-spin 0.8s linear infinite;
+}
+
+@keyframes app-loading-spin {
+  to { transform: rotate(360deg); }
+}
+
+.login-card {
+  width: 100%;
+  max-width: 340px;
+  padding: 28px;
+  text-align: left;
+}
+
+.login-title {
+  margin: 0 0 18px;
+  font-family: var(--font-display);
+  color: var(--color-text);
+  text-align: center;
+}
+
 html, body {
   margin: 0;
   padding: 0;

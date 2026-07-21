@@ -8,9 +8,34 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=9">
+  <link rel="stylesheet" href="css/styles.css?v=11">
 </head>
 <body>
+  <div id="app-loading-overlay" class="app-loading-overlay">
+    <div class="app-loading-spinner"></div>
+    <p id="app-loading-text">Comprobando sesión…</p>
+  </div>
+
+  <div id="login-overlay" class="app-loading-overlay hidden">
+    <div class="login-card card">
+      <h2 class="login-title">Iniciar sesión</h2>
+      <form id="login-form" class="appt-form">
+        <label>Correo electrónico
+          <input type="email" id="login-email" required autocomplete="username">
+        </label>
+        <label>Contraseña
+          <input type="password" id="login-password" required autocomplete="current-password">
+        </label>
+        <p id="login-error" class="field-warning hidden"></p>
+        <div class="form-actions">
+          <div class="form-actions-right">
+            <button type="submit" class="btn btn-primary">Entrar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="app">
     <header class="app-header">
       <div class="brand">
@@ -40,6 +65,7 @@
       <button id="btn-new-employee" class="btn btn-primary hidden">
         <span class="btn-icon-inline">+</span> Nuevo empleado
       </button>
+      <button id="btn-logout" class="btn btn-ghost">Cerrar sesión</button>
     </header>
 
     <main class="app-main" id="view-agenda">
@@ -386,14 +412,15 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script src="js/store.js?v=9"></script>
-  <script src="js/countries.js?v=9"></script>
-  <script src="js/calendar.js?v=9"></script>
-  <script src="js/schedule.js?v=9"></script>
-  <script src="js/appointments.js?v=9"></script>
-  <script src="js/clients.js?v=9"></script>
-  <script src="js/employees.js?v=9"></script>
-  <script src="js/statistics.js?v=9"></script>
-  <script src="js/app.js?v=9"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/store.js?v=11"></script>
+  <script src="js/countries.js?v=11"></script>
+  <script src="js/calendar.js?v=11"></script>
+  <script src="js/schedule.js?v=11"></script>
+  <script src="js/appointments.js?v=11"></script>
+  <script src="js/clients.js?v=11"></script>
+  <script src="js/employees.js?v=11"></script>
+  <script src="js/statistics.js?v=11"></script>
+  <script src="js/app.js?v=11"></script>
 </body>
 </html>

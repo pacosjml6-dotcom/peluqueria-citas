@@ -103,7 +103,7 @@ const Employees = {
     }
   },
 
-  handleSubmit(e) {
+  async handleSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('employee-id').value;
     const name = document.getElementById('employee-name').value.trim();
@@ -114,17 +114,26 @@ const Employees = {
     }
 
     const data = { name, photo: this.currentPhotoDataUrl || null };
+    const submitBtn = e.submitter || e.target.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
 
-    if (id) {
-      EmployeeStore.update(id, data);
-      showToast('Empleado actualizado correctamente', 'success');
-    } else {
-      EmployeeStore.create(data);
-      showToast('Empleado añadido correctamente', 'success');
+    try {
+      if (id) {
+        await EmployeeStore.update(id, data);
+        showToast('Empleado actualizado correctamente', 'success');
+      } else {
+        await EmployeeStore.create(data);
+        showToast('Empleado añadido correctamente', 'success');
+      }
+
+      this.closeForm();
+      this.renderList();
+    } catch (err) {
+      console.error('Error guardando el empleado', err);
+      showToast('No se pudo guardar el empleado. Comprueba tu conexión e inténtalo de nuevo.', 'error');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
     }
-
-    this.closeForm();
-    this.renderList();
   },
 
   askDelete(id) {
@@ -141,13 +150,18 @@ const Employees = {
     this.pendingDeleteId = null;
   },
 
-  confirmDelete() {
+  async confirmDelete() {
     if (!this.pendingDeleteId) return;
-    EmployeeStore.remove(this.pendingDeleteId);
-    this.closeConfirm();
-    this.closeForm();
-    showToast('Empleado eliminado', 'success');
-    this.renderList();
+    try {
+      await EmployeeStore.remove(this.pendingDeleteId);
+      this.closeConfirm();
+      this.closeForm();
+      showToast('Empleado eliminado', 'success');
+      this.renderList();
+    } catch (err) {
+      console.error('Error eliminando el empleado', err);
+      showToast('No se pudo eliminar el empleado. Inténtalo de nuevo.', 'error');
+    }
   },
 
   renderList() {
