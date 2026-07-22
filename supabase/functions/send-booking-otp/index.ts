@@ -63,6 +63,12 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
+  // Purga solicitudes ya caducadas que el cliente nunca llegó a confirmar
+  // (pestaña cerrada, código ignorado, etc.). Sin esto, sus datos personales
+  // (nombre, teléfono, email) se quedarían en la tabla para siempre, aunque
+  // la cita nunca llegue a crearse.
+  await admin.from('reserva_otp').delete().lt('expires_at', new Date().toISOString());
+
   // Evita que se pueda usar este endpoint para bombardear a alguien con
   // correos: como máximo 3 códigos por email en el último minuto.
   const { count } = await admin
