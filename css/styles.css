@@ -1631,6 +1631,54 @@ body.public-booking-body {
   word-break: break-all;
 }
 
+/* Temporizador y entrada del código de confirmación por correo */
+.pb-otp-timer-wrap {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.pb-otp-timer {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 8px;
+}
+
+.pb-otp-timer-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.pb-otp-timer-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--color-primary);
+  border-radius: 999px;
+  transition: width 250ms linear, background var(--transition);
+}
+
+.pb-otp-timer-low { color: var(--color-danger); }
+.pb-otp-timer-fill-low { background: var(--color-danger); }
+
+.pb-otp-code-input {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  font-family: var(--font-display);
+}
+
+.pb-otp-expired {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 @media (max-width: 480px) {
   .public-booking-page { padding: 16px 10px; }
   .public-booking-card { padding: 16px; }

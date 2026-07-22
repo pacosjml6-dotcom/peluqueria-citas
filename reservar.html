@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=21">
+  <link rel="stylesheet" href="css/styles.css?v=22">
 </head>
 <body class="public-booking-body">
   <div id="booking-loading" class="app-loading-overlay">
@@ -86,6 +86,47 @@
     </div>
   </main>
 
+  <main class="public-booking-page hidden" id="booking-otp">
+    <div class="public-booking-card card">
+      <div class="public-booking-header">
+        <span class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="16" rx="3"></rect>
+            <path d="M3 9.5h18"></path>
+            <path d="M8 3v4"></path>
+            <path d="M16 3v4"></path>
+            <path d="M8.5 14.5l2.5 2.5 4.5-4.5"></path>
+          </svg>
+        </span>
+        <div>
+          <h1 class="public-booking-title">Confirma tu cita</h1>
+          <p class="public-booking-subtitle" id="pb-otp-email-hint">Te hemos enviado un código a tu correo.</p>
+        </div>
+      </div>
+
+      <div class="pb-otp-timer-wrap">
+        <div class="pb-otp-timer" id="pb-otp-timer">0:45</div>
+        <div class="pb-otp-timer-track"><div class="pb-otp-timer-fill" id="pb-otp-timer-fill"></div></div>
+      </div>
+
+      <form id="pb-otp-form" class="appt-form">
+        <label>Código de 6 dígitos
+          <input type="text" id="pb-otp-code" class="pb-otp-code-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="000000" required>
+        </label>
+        <p id="pb-otp-warning" class="field-warning hidden"></p>
+        <div class="form-actions">
+          <button type="submit" id="pb-otp-submit" class="btn btn-primary public-booking-submit">Confirmar cita</button>
+        </div>
+      </form>
+
+      <div id="pb-otp-expired" class="pb-otp-expired hidden">
+        <p class="field-warning">Se acabó el tiempo para confirmar. La cita no se ha creado.</p>
+        <button type="button" id="pb-otp-resend" class="btn btn-ghost public-booking-submit">Enviar otro código</button>
+        <button type="button" id="pb-otp-back" class="btn btn-ghost public-booking-submit">Volver al formulario</button>
+      </div>
+    </div>
+  </main>
+
   <main class="public-booking-page hidden" id="booking-success">
     <div class="public-booking-card card public-booking-success">
       <span class="public-booking-success-icon" aria-hidden="true">&#10003;</span>
@@ -108,6 +149,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/store.js?v=21"></script>
   <script src="js/countries.js?v=21"></script>
-  <script src="js/public-booking.js?v=21"></script>
+  <script src="js/public-booking.js?v=22"></script>
 </body>
 </html>

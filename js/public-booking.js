@@ -1,10 +1,17 @@
 /* Página pública de autorreserva de citas (se abre al escanear el código QR
    de la pantalla principal). No requiere iniciar sesión: solo puede crear
    citas nuevas, nunca leer ni modificar citas o clientes ya existentes, para
-   no exponer datos personales a través de un enlace público. */
+   no exponer datos personales a través de un enlace público.
+
+   La cita no se crea al enviar el formulario: primero se manda un código de
+   6 dígitos al correo del cliente (Edge Function "send-booking-otp") y solo
+   si lo confirma en un plazo de OTP_TTL_SECONDS se llega a crear la cita
+   (RPC "verify_appointment_otp", ver supabase/booking-otp.sql). Si se agota
+   el tiempo, la solicitud queda invalidada y no se crea nada. */
 
 const CONFLICT_WINDOW_MINUTES = 20;
 const SLOT_INTERVAL_MINUTES = 15;
+const OTP_TTL_SECONDS = 45;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const loading = document.getElementById('booking-loading');
@@ -27,6 +34,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 const PublicBooking = {
   occupied: [],
+  otpRequestId: null,
+  otpPayload: null,
+  otpTimerInterval: null,
+  otpDeadline: null,
 
   init() {
     this.populatePhoneCodeSelect();
@@ -41,6 +52,10 @@ const PublicBooking = {
       await this.loadOccupiedSlots(document.getElementById('pb-date').value);
       this.refreshTimeSlots();
     });
+
+    document.getElementById('pb-otp-form').addEventListener('submit', (e) => this.handleVerifyOtp(e));
+    document.getElementById('pb-otp-resend').addEventListener('click', () => this.handleResendOtp());
+    document.getElementById('pb-otp-back').addEventListener('click', () => this.resetForm());
   },
 
   populatePhoneCodeSelect() {
@@ -163,8 +178,8 @@ const PublicBooking = {
     submitBtn.disabled = true;
 
     try {
-      // Vuelve a comprobar el hueco justo antes de guardar, por si alguien lo
-      // ha ocupado mientras se rellenaba el formulario.
+      // Vuelve a comprobar el hueco justo antes de pedir el código, por si
+      // alguien lo ha ocupado mientras se rellenaba el formulario.
       await this.loadOccupiedSlots(date);
       const t = timeToMinutes(time);
       const stillFree = !this.occupied.some(o => o.employee_id === employeeId && Math.abs(timeToMinutes(o.time) - t) < CONFLICT_WINDOW_MINUTES);
@@ -175,20 +190,138 @@ const PublicBooking = {
       }
 
       const fullPhone = `+${dialCode}${phoneDigits}`;
-      const row = citaToRow({
-        name, phone: fullPhone, dialCode, phoneLocal: phoneLocalRaw, email,
-        employeeId, clientId: null, date, time, notes,
-      });
+      const payload = {
+        name, phone: fullPhone, dial_code: dialCode, phone_local: phoneLocalRaw, email,
+        employee_id: employeeId, date, time, notes,
+      };
 
-      const { error } = await supabaseClient.from('citas').insert(row);
+      const { data, error } = await supabaseClient.functions.invoke('send-booking-otp', { body: { payload } });
       if (error) throw error;
+      if (!data || !data.ok) {
+        showPbToast(otpErrorMessage(data && data.error), 'error');
+        return;
+      }
 
-      this.showSuccess({ name, date, time, notes, employeeId });
+      this.otpPayload = payload;
+      this.showOtpStep(data.requestId, data.expiresInSeconds || OTP_TTL_SECONDS);
     } catch (err) {
-      console.error('Error guardando la cita', err);
-      showPbToast('No se pudo guardar la cita. Comprueba tu conexión e inténtalo de nuevo.', 'error');
+      console.error('Error solicitando el código de confirmación', err);
+      showPbToast('No se pudo enviar el código de confirmación. Comprueba tu conexión e inténtalo de nuevo.', 'error');
     } finally {
       submitBtn.disabled = false;
+    }
+  },
+
+  showOtpStep(requestId, seconds) {
+    this.otpRequestId = requestId;
+    document.getElementById('pb-otp-email-hint').textContent = `Te hemos enviado un código a ${this.otpPayload.email}.`;
+    document.getElementById('pb-otp-code').value = '';
+    document.getElementById('pb-otp-warning').classList.add('hidden');
+    document.getElementById('pb-otp-form').classList.remove('hidden');
+    document.getElementById('pb-otp-expired').classList.add('hidden');
+    document.getElementById('booking-page').classList.add('hidden');
+    document.getElementById('booking-otp').classList.remove('hidden');
+    this.startOtpCountdown(seconds);
+    document.getElementById('pb-otp-code').focus();
+  },
+
+  startOtpCountdown(seconds) {
+    clearInterval(this.otpTimerInterval);
+    this.otpDeadline = Date.now() + seconds * 1000;
+    const totalMs = seconds * 1000;
+    const timerEl = document.getElementById('pb-otp-timer');
+    const fillEl = document.getElementById('pb-otp-timer-fill');
+
+    const tick = () => {
+      const remainingMs = Math.max(0, this.otpDeadline - Date.now());
+      timerEl.textContent = `0:${String(Math.ceil(remainingMs / 1000)).padStart(2, '0')}`;
+      fillEl.style.width = `${(remainingMs / totalMs) * 100}%`;
+      const isLow = remainingMs <= 10000;
+      timerEl.classList.toggle('pb-otp-timer-low', isLow);
+      fillEl.classList.toggle('pb-otp-timer-fill-low', isLow);
+      if (remainingMs <= 0) {
+        clearInterval(this.otpTimerInterval);
+        this.handleOtpTimeout();
+      }
+    };
+    tick();
+    this.otpTimerInterval = setInterval(tick, 250);
+  },
+
+  handleOtpTimeout() {
+    this.otpRequestId = null;
+    document.getElementById('pb-otp-form').classList.add('hidden');
+    document.getElementById('pb-otp-expired').classList.remove('hidden');
+  },
+
+  async handleVerifyOtp(e) {
+    e.preventDefault();
+    const code = document.getElementById('pb-otp-code').value.trim();
+    const warningEl = document.getElementById('pb-otp-warning');
+
+    if (!/^\d{6}$/.test(code)) {
+      warningEl.textContent = 'Introduce los 6 dígitos del código.';
+      warningEl.classList.remove('hidden');
+      return;
+    }
+    if (!this.otpRequestId) return;
+
+    const submitBtn = document.getElementById('pb-otp-submit');
+    submitBtn.disabled = true;
+
+    try {
+      const { data, error } = await supabaseClient.rpc('verify_appointment_otp', {
+        p_request_id: this.otpRequestId,
+        p_code: code,
+      });
+      if (error) throw error;
+
+      if (!data || !data.ok) {
+        if (data && data.error === 'expired') {
+          this.handleOtpTimeout();
+          return;
+        }
+        warningEl.textContent = otpErrorMessage(data && data.error, data && data.attempts_left);
+        warningEl.classList.remove('hidden');
+        return;
+      }
+
+      clearInterval(this.otpTimerInterval);
+      document.getElementById('booking-otp').classList.add('hidden');
+      this.showSuccess({
+        name: this.otpPayload.name,
+        date: this.otpPayload.date,
+        time: this.otpPayload.time,
+        notes: this.otpPayload.notes,
+        employeeId: this.otpPayload.employee_id,
+      });
+    } catch (err) {
+      console.error('Error verificando el código', err);
+      warningEl.textContent = 'No se pudo comprobar el código. Inténtalo de nuevo.';
+      warningEl.classList.remove('hidden');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  },
+
+  async handleResendOtp() {
+    if (!this.otpPayload) { this.resetForm(); return; }
+    const resendBtn = document.getElementById('pb-otp-resend');
+    resendBtn.disabled = true;
+
+    try {
+      const { data, error } = await supabaseClient.functions.invoke('send-booking-otp', { body: { payload: this.otpPayload } });
+      if (error) throw error;
+      if (!data || !data.ok) {
+        showPbToast(otpErrorMessage(data && data.error), 'error');
+        return;
+      }
+      this.showOtpStep(data.requestId, data.expiresInSeconds || OTP_TTL_SECONDS);
+    } catch (err) {
+      console.error('Error reenviando el código', err);
+      showPbToast('No se pudo reenviar el código. Inténtalo de nuevo.', 'error');
+    } finally {
+      resendBtn.disabled = false;
     }
   },
 
@@ -201,21 +334,49 @@ const PublicBooking = {
       ${employee ? `<div class="public-booking-summary-row"><strong>Profesional:</strong> ${escapeHtml(employee.name)}</div>` : ''}
       ${notes ? `<div class="public-booking-summary-row"><strong>Servicio:</strong> ${escapeHtml(notes)}</div>` : ''}
     `;
-    document.getElementById('booking-page').classList.add('hidden');
     document.getElementById('booking-success').classList.remove('hidden');
   },
 
   resetForm() {
+    clearInterval(this.otpTimerInterval);
+    this.otpRequestId = null;
+    this.otpPayload = null;
+
     document.getElementById('public-appt-form').reset();
     document.getElementById('pb-phone-code').value = '34';
     document.getElementById('pb-date').min = toISODate(new Date());
     document.getElementById('pb-time').innerHTML = '<option value="">Selecciona primero una fecha</option>';
     document.getElementById('pb-warning').classList.add('hidden');
     this.occupied = [];
+
+    document.getElementById('booking-otp').classList.add('hidden');
     document.getElementById('booking-success').classList.add('hidden');
     document.getElementById('booking-page').classList.remove('hidden');
   }
 };
+
+function otpErrorMessage(code, attemptsLeft) {
+  switch (code) {
+    case 'invalid_code':
+      return attemptsLeft != null ? `Código incorrecto. Te quedan ${attemptsLeft} intentos.` : 'Código incorrecto.';
+    case 'too_many_attempts':
+      return 'Has agotado los intentos. Pide un código nuevo.';
+    case 'expired':
+      return 'El código ha caducado.';
+    case 'slot_taken':
+      return 'Ese hueco se acaba de ocupar. Vuelve a intentarlo con otra hora.';
+    case 'not_found':
+      return 'No se encontró la solicitud. Pide un código nuevo.';
+    case 'rate_limited':
+      return 'Has pedido demasiados códigos seguidos. Espera un minuto e inténtalo de nuevo.';
+    case 'invalid_email':
+      return 'El correo no es válido.';
+    case 'email_failed':
+      return 'No se pudo enviar el correo con el código. Inténtalo de nuevo en un momento.';
+    default:
+      return 'No se pudo procesar la solicitud. Inténtalo de nuevo.';
+  }
+}
 
 function toISODate(d) {
   const y = d.getFullYear();
