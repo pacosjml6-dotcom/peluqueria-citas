@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=20">
+  <link rel="stylesheet" href="css/styles.css?v=21">
 </head>
 <body>
   <div id="app-loading-overlay" class="app-loading-overlay">
@@ -64,6 +64,12 @@
       </button>
       <button id="btn-new-employee" class="btn btn-primary hidden">
         <span class="btn-icon-inline">+</span> Nuevo empleado
+      </button>
+      <button id="btn-show-qr" class="btn btn-ghost" type="button" title="Mostrar código QR para que un cliente reserve cita desde el móvil">
+        <span class="btn-icon-inline" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M14 14h3v3h-3z"></path><path d="M20 14v3"></path><path d="M14 20h3"></path></svg>
+        </span>
+        QR
       </button>
       <button id="btn-logout" class="btn btn-ghost">Cerrar sesión</button>
     </header>
@@ -421,6 +427,6 @@
   <script src="js/clients.js?v=17"></script>
   <script src="js/employees.js?v=17"></script>
   <script src="js/statistics.js?v=17"></script>
-  <script src="js/app.js?v=17"></script>
+  <script src="js/app.js?v=18"></script>
 </body>
 </html>

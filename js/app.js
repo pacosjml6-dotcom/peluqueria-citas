@@ -95,6 +95,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       Appointments.renderList(Calendar.selectedDate);
     });
 
+    document.getElementById('btn-show-qr').addEventListener('click', () => {
+      const url = new URL('qr.html', window.location.href).href;
+      window.open(url, 'qr-reserva', 'width=480,height=680');
+    });
+
     const tabs = [
       { tab: 'tab-agenda', view: 'view-agenda', newBtn: 'btn-new-appt' },
       { tab: 'tab-clients', view: 'view-clients', newBtn: 'btn-new-client' },
