@@ -438,10 +438,14 @@ const Appointments = {
       item.innerHTML = `
         <div class="appt-time">${escapeHtml(appt.time)}</div>
         <div class="appt-info">
-          <div class="appt-name">${escapeHtml(appt.name)}</div>
-          <div class="appt-notes">${escapeHtml(appt.notes || 'Sin notas')}</div>
-          <div class="appt-phone">${escapeHtml(appt.phone)}</div>
-          ${employee ? `<div class="appt-employee">Atiende: ${escapeHtml(employee.name)}</div>` : ''}
+          <div class="appt-row-top">
+            <div class="appt-name">${escapeHtml(appt.name)}</div>
+            <div class="appt-phone">${escapeHtml(appt.phone)}</div>
+          </div>
+          <div class="appt-row-bottom">
+            <div class="appt-notes">${escapeHtml(appt.notes || 'Sin notas')}</div>
+            ${employee ? `<div class="appt-employee">${escapeHtml(employee.name)}</div>` : ''}
+          </div>
         </div>
         <div class="appt-actions">
           <button class="btn-icon btn-edit" aria-label="Editar cita" title="Editar">&#9998;</button>
