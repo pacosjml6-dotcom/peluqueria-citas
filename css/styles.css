@@ -356,6 +356,15 @@ button {
   border-color: var(--color-primary-light);
 }
 
+.calendar-day.is-past .day-number {
+  color: #dc2626;
+}
+
+.calendar-day.is-past:not(.is-outside) {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.25);
+}
+
 .calendar-day.is-selected {
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
   border-color: var(--color-primary-dark);

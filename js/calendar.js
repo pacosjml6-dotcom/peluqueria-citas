@@ -73,6 +73,7 @@ const Calendar = {
       cell.className = 'calendar-day';
       if (isOutside) cell.classList.add('is-outside');
       if (iso === todayStr) cell.classList.add('is-today');
+      if (iso < todayStr) cell.classList.add('is-past');
       if (iso === this.selectedDate) cell.classList.add('is-selected');
 
       const num = document.createElement('span');

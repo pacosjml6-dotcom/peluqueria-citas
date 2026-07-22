@@ -142,9 +142,14 @@ const Appointments = {
       return;
     }
 
+    const now = new Date();
+    const isToday = dateStr === toISODate(now);
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
     const slots = [];
     ranges.forEach(range => {
       for (let t = timeToMinutes(range.open); t < timeToMinutes(range.close); t += SLOT_INTERVAL_MINUTES) {
+        if (isToday && t < nowMinutes) continue;
         slots.push(minutesToTime(t));
       }
     });
@@ -160,8 +165,20 @@ const Appointments = {
     select.value = previous || '';
   },
 
+  isPastSlot(date, time) {
+    if (!date) return false;
+    const now = new Date();
+    const todayStr = toISODate(now);
+    if (date < todayStr) return true;
+    if (date > todayStr) return false;
+    if (!time) return false;
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    return timeToMinutes(time) < nowMinutes;
+  },
+
   getScheduleIssue(date, time) {
     if (!date) return null;
+    if (this.isPastSlot(date, time)) return { type: 'past' };
     const schedule = ScheduleStore.getForDate(date);
     if (!schedule) return null;
     const ranges = schedule.closed ? [] : ScheduleStore.getRanges(schedule);
@@ -193,9 +210,11 @@ const Appointments = {
 
     const scheduleIssue = this.getScheduleIssue(date, time);
     if (scheduleIssue) {
-      warningEl.textContent = scheduleIssue.type === 'closed'
-        ? '⚠️ El establecimiento está cerrado ese día. Elige otra fecha.'
-        : `⚠️ Esa hora está fuera del horario laboral (${formatScheduleRanges(scheduleIssue.ranges)}). Elige una hora dentro de ese horario.`;
+      warningEl.textContent = scheduleIssue.type === 'past'
+        ? '⚠️ No se pueden crear citas en una fecha u hora anterior a la actual.'
+        : scheduleIssue.type === 'closed'
+          ? '⚠️ El establecimiento está cerrado ese día. Elige otra fecha.'
+          : `⚠️ Esa hora está fuera del horario laboral (${formatScheduleRanges(scheduleIssue.ranges)}). Elige una hora dentro de ese horario.`;
       warningEl.classList.remove('hidden');
       saveBtn.disabled = true;
       return true;
@@ -223,6 +242,7 @@ const Appointments = {
   openForm(appt = null, presetDate = null) {
     const form = document.getElementById('appt-form');
     form.reset();
+    document.getElementById('appt-date').min = toISODate(new Date());
     document.getElementById('appt-id').value = '';
     document.getElementById('btn-delete-appt').classList.add('hidden');
     document.getElementById('modal-title').textContent = 'Nueva cita';
@@ -293,9 +313,11 @@ const Appointments = {
     if (scheduleIssue) {
       this.checkEmployeeConflict();
       showToast(
-        scheduleIssue.type === 'closed'
-          ? 'El establecimiento está cerrado ese día. Elige otra fecha.'
-          : 'Esa hora está fuera del horario laboral. Elige una hora dentro del horario configurado.',
+        scheduleIssue.type === 'past'
+          ? 'No se pueden crear citas en una fecha u hora anterior a la actual.'
+          : scheduleIssue.type === 'closed'
+            ? 'El establecimiento está cerrado ese día. Elige otra fecha.'
+            : 'Esa hora está fuera del horario laboral. Elige una hora dentro del horario configurado.',
         'error'
       );
       return;
