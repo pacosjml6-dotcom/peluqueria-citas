@@ -46,8 +46,9 @@ const Appointments = {
       else if (!document.getElementById('modal-overlay').classList.contains('hidden')) this.closeForm();
     });
 
-    // Mantiene los colores de estado (verde/rojo) al día mientras la vista está abierta
-    setInterval(() => this.renderList(Calendar.selectedDate), 60000);
+    // Mantiene los colores de estado (verde/rojo) y el parpadeo de la cita en curso
+    // al día sin que el usuario tenga que refrescar la página.
+    setInterval(() => this.renderList(Calendar.selectedDate), 30000);
   },
 
   populatePhoneCodeSelect() {
