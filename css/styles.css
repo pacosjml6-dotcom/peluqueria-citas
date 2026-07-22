@@ -2,30 +2,30 @@
    Gestión de Citas · Variables y reset
    ========================================================================== */
 :root {
-  --color-bg: #f4f8fb;
+  --color-bg: #f8fafc;
   --color-surface: #ffffff;
-  --color-surface-alt: #eaf2f8;
-  --color-primary: #4f8fc0;
-  --color-primary-dark: #3b6f9c;
-  --color-primary-light: #dceaf5;
-  --color-accent: #79b8d9;
-  --color-text: #2c3e50;
-  --color-text-muted: #71828f;
-  --color-border: #dce6ee;
-  --color-danger: #d9645c;
-  --color-danger-light: #fbe8e6;
-  --color-success: #4caf82;
+  --color-surface-alt: #f1f5f9;
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-light: #eff6ff;
+  --color-accent: #3b82f6;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-danger: #dc2626;
+  --color-danger-light: #fef2f2;
+  --color-success: #16a34a;
 
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 22px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 6px;
 
-  --shadow-sm: 0 1px 3px rgba(44, 62, 80, 0.08);
-  --shadow-md: 0 10px 30px rgba(44, 62, 80, 0.10);
-  --shadow-lg: 0 20px 50px rgba(44, 62, 80, 0.16);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 4px 16px rgba(15, 23, 42, 0.10);
 
-  --transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
-  --font-display: 'Playfair Display', Georgia, serif;
+  --transition: 150ms ease;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   /* Paleta categórica para gráficos (validada para daltonismo y contraste) */
@@ -99,20 +99,19 @@ html, body {
 body {
   font-family: var(--font-body);
   background: var(--color-bg);
-  background-image:
-    radial-gradient(circle at 10% 0%, rgba(79, 143, 192, 0.05), transparent 40%),
-    radial-gradient(circle at 90% 10%, rgba(121, 184, 217, 0.06), transparent 45%);
   color: var(--color-text);
   height: 100vh;
   height: 100dvh;
   -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
 }
 
-h1, h2, h3 { font-family: var(--font-display); margin: 0; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.02em; }
 
 button {
   font-family: var(--font-body);
   cursor: pointer;
+  letter-spacing: -0.01em;
 }
 
 /* ==========================================================================
@@ -151,9 +150,9 @@ button {
   align-items: center;
   justify-content: center;
   color: var(--color-primary-dark);
-  background: linear-gradient(135deg, var(--color-primary-light), var(--color-surface));
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
 }
 
 .brand-tagline {
@@ -161,7 +160,7 @@ button {
   font-size: 17px;
   font-weight: 600;
   color: var(--color-text);
-  letter-spacing: 0.2px;
+  letter-spacing: -0.01em;
 }
 
 .app > main {
@@ -214,37 +213,32 @@ button {
    Botones
    ========================================================================== */
 .btn {
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 11px 20px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 9px 16px;
   font-size: 14px;
   font-weight: 600;
-  transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow var(--transition), background var(--transition);
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.btn:hover { transform: translateY(-2px); }
-.btn:active { transform: translateY(0) scale(0.96); transition-duration: 80ms; }
-
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: var(--color-primary);
+  border-color: var(--color-primary);
   color: #fff;
-  box-shadow: 0 6px 16px rgba(79, 143, 192, 0.32);
 }
 
-.btn-primary:hover { box-shadow: 0 10px 22px rgba(79, 143, 192, 0.42); }
+.btn-primary:hover { background: var(--color-primary-dark); border-color: var(--color-primary-dark); }
 
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
 }
 
 .btn-ghost {
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-text-muted);
   border: 1px solid var(--color-border);
 }
@@ -252,74 +246,69 @@ button {
 .btn-ghost:hover {
   background: var(--color-surface-alt);
   color: var(--color-text);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--color-text-muted);
 }
 
 .btn-danger {
   background: var(--color-danger-light);
   color: var(--color-danger);
+  border: 1px solid var(--color-danger-light);
 }
 
-.btn-danger:hover { background: #f0cfc9; box-shadow: var(--shadow-sm); }
+.btn-danger:hover { background: #fee2e2; border-color: var(--color-danger); }
 
 .btn-icon-inline { font-size: 16px; line-height: 1; }
 
 .btn-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-muted);
-  font-size: 18px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), background var(--transition), color var(--transition), border-color var(--transition);
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
 
 .btn-icon:hover {
   background: var(--color-primary-light);
   color: var(--color-primary-dark);
   border-color: var(--color-primary-light);
-  transform: scale(1.1);
 }
-
-.btn-icon:active { transform: scale(0.9); transition-duration: 80ms; }
 
 /* ==========================================================================
    Pestañas de navegación
    ========================================================================== */
 .tabs {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   background: var(--color-surface-alt);
-  padding: 4px;
-  border-radius: 999px;
+  padding: 3px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
 }
 
 .tab-btn {
   border: none;
   background: transparent;
-  padding: 9px 18px;
-  border-radius: 999px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text-muted);
-  transition: all var(--transition);
+  transition: background var(--transition), color var(--transition);
 }
 
 .tab-btn:hover {
   color: var(--color-text);
 }
 
-.tab-btn:active { transform: scale(0.95); }
-
 .tab-btn.active {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: var(--color-primary);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(79, 143, 192, 0.32);
 }
 
 /* ==========================================================================
@@ -367,13 +356,12 @@ button {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  transition: all var(--transition);
+  transition: background var(--transition), border-color var(--transition);
   color: var(--color-text);
 }
 
 .calendar-day:hover {
   border-color: var(--color-primary);
-  transform: translateY(-2px);
 }
 
 .calendar-day.is-outside {
@@ -383,27 +371,36 @@ button {
 }
 
 .calendar-day.is-today .day-number {
-  color: var(--color-primary-dark);
+  color: var(--color-success);
   font-weight: 700;
 }
 
 .calendar-day.is-today {
-  border-color: var(--color-primary-light);
+  background: rgba(22, 163, 74, 0.08);
+  border-color: var(--color-success);
 }
 
 .calendar-day.is-past .day-number {
-  color: #dc2626;
+  color: var(--color-text-muted);
 }
 
 .calendar-day.is-past:not(.is-outside) {
-  background: rgba(220, 38, 38, 0.08);
-  border-color: rgba(220, 38, 38, 0.25);
+  background: var(--color-surface-alt);
+  border-color: var(--color-border);
+}
+
+.calendar-day.is-future .day-number {
+  color: var(--color-primary-dark);
+}
+
+.calendar-day.is-future:not(.is-outside) {
+  background: rgba(37, 99, 235, 0.06);
+  border-color: rgba(37, 99, 235, 0.2);
 }
 
 .calendar-day.is-selected {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: var(--color-primary);
   border-color: var(--color-primary-dark);
-  box-shadow: var(--shadow-sm);
 }
 
 .calendar-day.is-selected .day-number { color: #fff; font-weight: 700; }
@@ -473,52 +470,53 @@ button {
   border-radius: var(--radius-sm);
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
-  transition: box-shadow var(--transition), transform var(--transition);
+  transition: box-shadow var(--transition), border-color var(--transition);
 }
 
 .appt-item:hover {
   box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
+  border-color: var(--color-text-muted);
 }
 
-/* Estado de la cita: verde si va a tiempo, rojo si ya pasó su hora (con 15
+/* Estado de la cita: verde si es próxima, gris si ya pasó su hora (con 15
    minutos de margen) sin haber sido atendida */
 .appt-item-upcoming {
   border-left: 7px solid var(--color-success);
 }
 
 .appt-item-overdue {
-  border-left: 7px solid var(--color-danger);
-  background: var(--color-danger-light);
+  border-left: 7px solid var(--color-text-muted);
+  background: var(--color-surface-alt);
+  opacity: 0.7;
 }
 
 .appt-item-overdue .appt-time {
-  color: var(--color-danger);
+  color: var(--color-text-muted);
 }
 
-/* Cita en curso ahora mismo: parpadeo suave para llamar la atención */
+/* Cita en curso ahora mismo: parpadeo en rojo para llamar la atención */
 .appt-item-active {
-  border-left-color: var(--color-primary-dark);
+  border-left-color: var(--color-danger);
   animation: appt-active-blink 1.6s ease-in-out infinite;
 }
 
 .appt-item-active .appt-time {
-  color: var(--color-primary-dark);
+  color: var(--color-danger);
 }
 
 @keyframes appt-active-blink {
   0%, 100% {
     background: var(--color-surface-alt);
-    box-shadow: 0 0 0 0 rgba(79, 143, 192, 0.35);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35);
   }
   50% {
-    background: var(--color-primary-light);
-    box-shadow: 0 0 0 4px rgba(79, 143, 192, 0.12);
+    background: var(--color-danger-light);
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .appt-item-active { animation: none; background: var(--color-primary-light); }
+  .appt-item-active { animation: none; background: var(--color-danger-light); }
 }
 
 .appt-time {
@@ -758,19 +756,19 @@ button {
   border-radius: var(--radius-md);
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
-  transition: box-shadow var(--transition), transform var(--transition);
+  transition: box-shadow var(--transition), border-color var(--transition);
 }
 
 .client-item:hover {
   box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
+  border-color: var(--color-text-muted);
 }
 
 .client-avatar {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary-light), var(--color-surface));
+  background: var(--color-primary-light);
   color: var(--color-primary-dark);
   display: flex;
   align-items: center;
@@ -810,7 +808,7 @@ button {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(43, 36, 32, 0.45);
+  background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
@@ -828,6 +826,7 @@ button {
 
 .modal {
   background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   padding: 24px;
@@ -896,7 +895,7 @@ button {
 .appt-form textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(79, 143, 192, 0.15);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   background: var(--color-surface);
 }
 
@@ -1028,7 +1027,7 @@ button {
 .avatar-picker-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(43, 36, 32, 0.4);
+  background: rgba(15, 23, 42, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1185,31 +1184,30 @@ button {
 
 .stats-filter-presets {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   flex-wrap: wrap;
   background: var(--color-surface-alt);
-  padding: 4px;
-  border-radius: 999px;
+  padding: 3px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
 }
 
 .filter-preset-btn {
   border: none;
   background: transparent;
-  padding: 8px 16px;
-  border-radius: 999px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text-muted);
-  transition: all var(--transition);
+  transition: background var(--transition), color var(--transition);
 }
 
 .filter-preset-btn:hover { color: var(--color-text); }
 
 .filter-preset-btn.active {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: var(--color-primary);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(79, 143, 192, 0.32);
 }
 
 .stats-range-inputs {
@@ -1240,7 +1238,7 @@ button {
 .stats-range-inputs input[type="date"]:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(79, 143, 192, 0.15);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   background: var(--color-surface);
 }
 
@@ -1265,8 +1263,9 @@ button {
 .stats-kpi-icon {
   width: 38px;
   height: 38px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--color-primary-light), var(--color-surface));
+  border-radius: var(--radius-md);
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-border);
   color: var(--color-primary-dark);
   display: flex;
   align-items: center;
