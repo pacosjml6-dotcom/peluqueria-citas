@@ -431,8 +431,9 @@ const Appointments = {
     appts.forEach(appt => {
       const employee = employees.find(e => e.id === appt.employeeId);
       const overdue = isApptOverdue(appt.date, appt.time);
+      const active = isApptActiveNow(appt.date, appt.time);
       const item = document.createElement('div');
-      item.className = `appt-item ${overdue ? 'appt-item-overdue' : 'appt-item-upcoming'}`;
+      item.className = `appt-item ${overdue ? 'appt-item-overdue' : 'appt-item-upcoming'}${active ? ' appt-item-active' : ''}`;
       item.innerHTML = `
         <div class="appt-time">${escapeHtml(appt.time)}</div>
         <div class="appt-info">
@@ -466,6 +467,19 @@ function isApptOverdue(dateStr, timeStr) {
   const apptMinutes = timeToMinutes(timeStr);
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   return nowMinutes - apptMinutes > APPT_OVERDUE_GRACE_MINUTES;
+}
+
+/* Una cita se considera "en curso ahora" si es hoy y ya llegó su hora, dentro
+   del mismo margen de gracia que usa isApptOverdue (antes de esos 15 minutos
+   se marca como pasada). */
+function isApptActiveNow(dateStr, timeStr) {
+  const now = new Date();
+  const todayStr = toISODate(now);
+  if (dateStr !== todayStr) return false;
+  const apptMinutes = timeToMinutes(timeStr);
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const diff = nowMinutes - apptMinutes;
+  return diff >= 0 && diff <= APPT_OVERDUE_GRACE_MINUTES;
 }
 
 function formatScheduleRanges(ranges) {
