@@ -129,12 +129,76 @@ button {
 
 .app-header {
   display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+  flex: 0 0 auto;
+}
+
+.header-row {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 20px;
   flex-wrap: wrap;
-  flex: 0 0 auto;
+}
+
+.header-row-top {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header-utilities {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 4px;
+}
+
+.header-utilities-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border);
+  margin: 0 4px;
+}
+
+.btn-util {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition), color var(--transition);
+}
+
+.btn-util:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-util-danger {
+  color: var(--color-danger);
+}
+
+.btn-util-danger:hover {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  box-shadow: none;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .brand {
@@ -367,26 +431,22 @@ button {
   box-shadow: var(--shadow-sm);
 }
 
-/* Relieve en los botones de la barra superior: sombra sutil que se
-   acentua al pasar el raton y se aplana al pulsar, para que destaquen
-   sobre el fondo de la cabecera. */
-.app-header .btn {
-  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.22), 0 2px 4px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+/* El CTA principal (Nueva cita/cliente/empleado) es el único botón de la
+   cabecera con algo de relieve, para que destaque como acción primaria
+   sobre la fila de pestañas. */
+.header-actions .btn {
+  box-shadow: var(--shadow-md);
   transition: background var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
 }
 
-.app-header .btn:hover {
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.28), 0 4px 8px rgba(15, 23, 42, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  transform: translateY(-3px);
+.header-actions .btn:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
 }
 
-.app-header .btn:active {
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
+.header-actions .btn:active {
+  box-shadow: var(--shadow-sm);
   transform: translateY(0);
-}
-
-.app-header .tabs {
-  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.22), 0 2px 4px rgba(15, 23, 42, 0.16);
 }
 
 /* ==========================================================================
@@ -1498,9 +1558,19 @@ button {
    ========================================================================== */
 .hidden { display: none !important; }
 
+@media (max-width: 640px) {
+  .btn-util-label { display: none; }
+  .btn-util { padding: 8px; }
+  .header-utilities-divider { margin: 0 2px; }
+  .header-row-bottom { flex-direction: column; align-items: stretch; }
+  .header-actions { justify-content: stretch; }
+  .header-actions .btn { flex: 1 1 auto; justify-content: center; }
+}
+
 @media (max-width: 480px) {
   .app { padding: 12px 10px 8px; }
   .app-header { gap: 10px; margin-bottom: 14px; }
+  .header-row-top { padding-bottom: 10px; }
   .brand { gap: 8px; }
   .brand-icon { width: 38px; height: 38px; }
   .brand-icon svg { width: 20px; height: 20px; }
