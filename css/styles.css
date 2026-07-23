@@ -215,9 +215,12 @@ button {
   overflow-y: auto;
 }
 
-.calendar-card,
-.schedule-card {
+.calendar-card {
   padding: 16px;
+}
+
+.schedule-card {
+  padding: 12px 16px;
 }
 
 .agenda-card {
@@ -638,28 +641,28 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .schedule-header h2 {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .schedule-summary {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .schedule-summary-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 9px;
+  padding: 4px 8px;
   border-radius: var(--radius-sm);
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .schedule-summary-day {
@@ -669,7 +672,7 @@ button {
 
 .schedule-summary-hours {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   color: var(--color-text-muted);
   text-align: right;
 }
@@ -793,7 +796,7 @@ button {
 .clients-list {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 5px;
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -803,8 +806,8 @@ button {
 .client-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px;
+  gap: 8px;
+  padding: 7px 8px;
   border-radius: var(--radius-md);
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
@@ -817,8 +820,8 @@ button {
 }
 
 .client-avatar {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--color-primary-light);
   color: var(--color-primary-dark);
@@ -826,7 +829,7 @@ button {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 11px;
   flex: 0 0 auto;
 }
 
@@ -834,24 +837,24 @@ button {
 
 .client-name {
   font-weight: 600;
-  font-size: 13px;
-  margin-bottom: 2px;
+  font-size: 12.5px;
+  margin-bottom: 1px;
 }
 
 .client-detail {
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--color-text-muted);
 }
 
 .client-actions {
   display: flex;
-  gap: 5px;
+  gap: 4px;
 }
 
 .client-actions .btn-icon {
-  width: 27px;
-  height: 27px;
-  font-size: 12.5px;
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
 }
 
 /* ==========================================================================
