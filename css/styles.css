@@ -1343,6 +1343,27 @@ button {
   margin-top: 6px;
 }
 
+.backup-section + .backup-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.backup-section-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.backup-section .field-hint,
+.backup-section .field-warning {
+  margin: 0 0 12px;
+}
+
+.backup-action-btn {
+  width: 100%;
+  justify-content: center;
+}
+
 .form-actions-right {
   display: flex;
   gap: 10px;

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=40">
+  <link rel="stylesheet" href="css/styles.css?v=41">
 </head>
 <body>
   <div id="app-loading-overlay" class="app-loading-overlay">
@@ -43,6 +43,12 @@
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17"></path><path d="M14 10h5a1 1 0 0 1 1 1v10"></path><path d="M8 8h1"></path><path d="M8 12h1"></path><path d="M8 16h1"></path><path d="M4 21h16"></path></svg>
         </span>
         Datos de empresa
+      </button>
+      <button id="btn-backup" class="btn btn-ghost" type="button" title="Hacer copia de seguridad o restaurar una copia">
+        <span class="btn-icon-inline" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path></svg>
+        </span>
+        Copia de seguridad
       </button>
       <div class="brand">
         <span class="brand-icon" aria-hidden="true">
@@ -507,6 +513,39 @@
     </div>
   </div>
 
+  <div id="backup-modal-overlay" class="modal-overlay hidden">
+    <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="backup-modal-title">
+      <div class="modal-header">
+        <h3 id="backup-modal-title">Copia de seguridad</h3>
+        <button id="btn-close-backup-modal" class="btn-icon" aria-label="Cerrar">&times;</button>
+      </div>
+
+      <div class="backup-section">
+        <p class="backup-section-title">Crear copia de seguridad</p>
+        <p class="field-hint">Descarga un archivo con todas las citas, clientes, empleados, horario y datos de empresa. Podrás elegir dónde guardarlo en tu equipo.</p>
+        <button type="button" id="btn-backup-export" class="btn btn-primary backup-action-btn">Descargar copia de seguridad</button>
+      </div>
+
+      <div class="backup-section">
+        <p class="backup-section-title">Restaurar copia de seguridad</p>
+        <p class="field-warning">Selecciona un archivo de copia de seguridad. Al restaurar se sustituirán todos los datos actuales y no se podrá deshacer.</p>
+        <button type="button" id="btn-backup-restore" class="btn btn-ghost backup-action-btn">Seleccionar archivo…</button>
+        <input type="file" id="backup-restore-input" accept="application/json,.json" class="hidden">
+      </div>
+    </div>
+  </div>
+
+  <div id="backup-restore-confirm-overlay" class="modal-overlay hidden">
+    <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="backup-restore-confirm-title">
+      <h3 id="backup-restore-confirm-title">¿Restaurar esta copia de seguridad?</h3>
+      <p id="backup-restore-confirm-message" class="confirm-message"></p>
+      <div class="form-actions">
+        <button id="btn-backup-restore-cancel" class="btn btn-ghost">Cancelar</button>
+        <button id="btn-backup-restore-confirm" class="btn btn-danger">Restaurar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast hidden"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -515,12 +554,13 @@
   <script src="js/calendar.js?v=17"></script>
   <script src="js/schedule.js?v=18"></script>
   <script src="js/company.js?v=1"></script>
+  <script src="js/backup.js?v=1"></script>
   <script src="js/appointments.js?v=24"></script>
   <script src="js/day-detail.js?v=2"></script>
   <script src="js/pending-payments.js?v=3"></script>
   <script src="js/clients.js?v=20"></script>
   <script src="js/employees.js?v=17"></script>
   <script src="js/statistics.js?v=19"></script>
-  <script src="js/app.js?v=21"></script>
+  <script src="js/app.js?v=22"></script>
 </body>
 </html>
