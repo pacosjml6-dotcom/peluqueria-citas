@@ -57,9 +57,13 @@ const PendingPayments = {
       const item = document.createElement('div');
       item.className = 'appt-item appt-item-pending-row';
       item.innerHTML = `
-        <div class="appt-time">
-          <div class="appt-pending-date">${escapeHtml(formatShortDate(appt.date))}</div>
-          <div>${escapeHtml(appt.time)}</div>
+        <div class="appt-time-col">
+          <button class="btn-icon btn-paid-toggle is-pending" aria-label="Marcar como cobrada" title="Pendiente de cobro · pulsa para marcar como cobrada">&euro;</button>
+          <div class="appt-time">
+            <div class="appt-pending-weekday">${escapeHtml(formatWeekday(appt.date))}</div>
+            <div class="appt-pending-date">${escapeHtml(formatShortDate(appt.date))}</div>
+            <div>${escapeHtml(appt.time)}</div>
+          </div>
         </div>
         <div class="appt-info">
           <div class="appt-name">${escapeHtml(appt.name)}</div>
@@ -70,7 +74,6 @@ const PendingPayments = {
           </div>
         </div>
         <div class="appt-actions">
-          <button class="btn-icon btn-paid-toggle is-pending" aria-label="Marcar como cobrada" title="Pendiente de cobro · pulsa para marcar como cobrada">&euro;</button>
           <a class="btn-icon btn-whatsapp" href="${whatsappUrl(appt.phone)}" target="_blank" rel="noopener" aria-label="Abrir chat de WhatsApp" title="Abrir WhatsApp">${WHATSAPP_ICON_SVG}</a>
         </div>
       `;
@@ -87,4 +90,12 @@ function formatShortDate(iso) {
   const [y, m, d] = iso.split('-').map(Number);
   const date = new Date(y, m - 1, d);
   return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+}
+
+const WEEKDAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+function formatWeekday(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return WEEKDAY_LABELS[date.getDay()];
 }

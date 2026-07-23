@@ -71,11 +71,6 @@
         </span>
         QR
       </button>
-      <button id="btn-pending-payments" class="btn btn-ghost" type="button" title="Ver citas pendientes de cobro">
-        <span class="btn-icon-inline" aria-hidden="true">&euro;</span>
-        Pendientes de cobro
-        <span id="pending-payments-badge" class="btn-badge hidden">0</span>
-      </button>
       <button id="btn-logout" class="btn btn-danger">Cerrar sesión</button>
     </header>
 
@@ -103,6 +98,13 @@
       </div>
 
       <section class="agenda-card card">
+        <div class="agenda-pending-row">
+          <button id="btn-pending-payments" class="btn btn-ghost" type="button" title="Ver citas pendientes de cobro">
+            <span class="btn-icon-inline" aria-hidden="true">&euro;</span>
+            Pendientes de cobro
+            <span id="pending-payments-badge" class="btn-badge hidden">0</span>
+          </button>
+        </div>
         <div class="agenda-header">
           <h2 id="agenda-title">Agenda de hoy</h2>
           <button id="btn-today" class="btn btn-ghost">Hoy</button>

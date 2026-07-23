@@ -448,7 +448,10 @@ const Appointments = {
       const item = document.createElement('div');
       item.className = `appt-item ${overdue ? 'appt-item-overdue' : 'appt-item-upcoming'}${active ? ' appt-item-active' : ''}`;
       item.innerHTML = `
-        <div class="appt-time">${escapeHtml(appt.time)}</div>
+        <div class="appt-time-col">
+          <button class="btn-icon btn-paid-toggle ${appt.paid ? 'is-paid' : 'is-pending'}" aria-label="${appt.paid ? 'Marcar como pendiente de cobro' : 'Marcar como cobrada'}" title="${appt.paid ? 'Cobrada · pulsa para marcar como pendiente' : 'Pendiente de cobro · pulsa para marcar como cobrada'}">&euro;</button>
+          <div class="appt-time">${escapeHtml(appt.time)}</div>
+        </div>
         <div class="appt-info">
           <div class="appt-name">
             ${escapeHtml(appt.name)}
@@ -461,7 +464,6 @@ const Appointments = {
           </div>
         </div>
         <div class="appt-actions">
-          <button class="btn-icon btn-paid-toggle ${appt.paid ? 'is-paid' : 'is-pending'}" aria-label="${appt.paid ? 'Marcar como pendiente de cobro' : 'Marcar como cobrada'}" title="${appt.paid ? 'Cobrada · pulsa para marcar como pendiente' : 'Pendiente de cobro · pulsa para marcar como cobrada'}">&euro;</button>
           <a class="btn-icon btn-whatsapp" href="${whatsappUrl(appt.phone)}" target="_blank" rel="noopener" aria-label="Abrir chat de WhatsApp" title="Abrir WhatsApp">${WHATSAPP_ICON_SVG}</a>
           <button class="btn-icon btn-edit" aria-label="Editar cita" title="Editar">&#9998;</button>
           <button class="btn-icon btn-delete" aria-label="Eliminar cita" title="Eliminar">&#128465;</button>
