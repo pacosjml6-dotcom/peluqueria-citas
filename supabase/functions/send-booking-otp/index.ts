@@ -8,7 +8,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const EMAIL_FROM = Deno.env.get('BOOKING_OTP_FROM') || 'Bella Studio <onboarding@resend.dev>';
+const EMAIL_FROM = Deno.env.get('BOOKING_OTP_FROM') || 'Confirmación de cita <onboarding@resend.dev>';
 
 const OTP_TTL_SECONDS = 45;
 const REQUIRED_FIELDS = ['name', 'phone', 'dial_code', 'phone_local', 'email', 'employee_id', 'date', 'time'];

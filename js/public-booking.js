@@ -45,7 +45,7 @@ const PublicBooking = {
 
     document.getElementById('pb-date').min = toISODate(new Date());
     document.getElementById('public-appt-form').addEventListener('submit', (e) => this.handleSubmit(e));
-    document.getElementById('pb-new-booking').addEventListener('click', () => this.resetForm());
+    document.getElementById('pb-exit').addEventListener('click', () => window.close());
 
     document.getElementById('pb-employee').addEventListener('change', () => this.refreshTimeSlots());
     document.getElementById('pb-date').addEventListener('change', async () => {
