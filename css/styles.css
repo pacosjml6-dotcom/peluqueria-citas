@@ -550,6 +550,13 @@ button {
   white-space: nowrap;
 }
 
+.appt-client-badge {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 4px;
+  color: var(--color-primary);
+}
+
 .appt-notes {
   font-size: 11.5px;
   color: var(--color-text-muted);

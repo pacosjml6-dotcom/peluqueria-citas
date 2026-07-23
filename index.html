@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=22">
+  <link rel="stylesheet" href="css/styles.css?v=23">
 </head>
 <body>
   <div id="app-loading-overlay" class="app-loading-overlay">
@@ -172,6 +172,14 @@
           <span id="stats-kpi-top-employee" class="stats-kpi-value">—</span>
           <span class="stats-kpi-label">Empleado con más citas</span>
           <span id="stats-kpi-top-employee-sub" class="stats-kpi-sub">Sin datos</span>
+        </div>
+        <div class="stats-kpi-tile card">
+          <span class="stats-kpi-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+          </span>
+          <span id="stats-kpi-client-booked" class="stats-kpi-value">0</span>
+          <span class="stats-kpi-label">Reservadas por el cliente</span>
+          <span id="stats-kpi-client-booked-sub" class="stats-kpi-sub">Sin datos</span>
         </div>
       </div>
 
@@ -419,14 +427,14 @@
   <div id="toast" class="toast hidden"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/store.js?v=17"></script>
+  <script src="js/store.js?v=18"></script>
   <script src="js/countries.js?v=17"></script>
   <script src="js/calendar.js?v=17"></script>
   <script src="js/schedule.js?v=17"></script>
-  <script src="js/appointments.js?v=17"></script>
+  <script src="js/appointments.js?v=18"></script>
   <script src="js/clients.js?v=17"></script>
   <script src="js/employees.js?v=17"></script>
-  <script src="js/statistics.js?v=17"></script>
+  <script src="js/statistics.js?v=18"></script>
   <script src="js/app.js?v=18"></script>
 </body>
 </html>

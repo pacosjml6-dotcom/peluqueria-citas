@@ -139,6 +139,13 @@ const Statistics = {
     document.getElementById('stats-kpi-top-employee').textContent = topEmployee ? topEmployee.label : '—';
     document.getElementById('stats-kpi-top-employee-sub').textContent =
       topEmployee ? `${topEmployee.value} cita${topEmployee.value === 1 ? '' : 's'}` : 'Sin datos en el periodo';
+
+    const clientBooked = appts.filter(a => a.createdByClient).length;
+    document.getElementById('stats-kpi-client-booked').textContent = clientBooked;
+    document.getElementById('stats-kpi-client-booked-sub').textContent =
+      appts.length === 0
+        ? 'Sin datos en el periodo'
+        : `${Math.round((clientBooked / appts.length) * 100)}% del total`;
   },
 
   renderSection(id) {

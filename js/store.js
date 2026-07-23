@@ -25,6 +25,7 @@ function citaFromRow(row) {
     date: row.date,
     time: row.time,
     notes: row.notes || '',
+    createdByClient: row.created_by_client || false,
   };
 }
 
