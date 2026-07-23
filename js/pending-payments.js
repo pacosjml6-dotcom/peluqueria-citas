@@ -58,12 +58,12 @@ const PendingPayments = {
       item.className = 'appt-item appt-item-pending-row';
       item.innerHTML = `
         <div class="appt-time-col">
-          <button class="btn-icon btn-paid-toggle is-pending" aria-label="Marcar como cobrada" title="Pendiente de cobro · pulsa para marcar como cobrada">&euro;</button>
           <div class="appt-time">
             <div class="appt-pending-weekday">${escapeHtml(formatWeekday(appt.date))}</div>
             <div class="appt-pending-date">${escapeHtml(formatShortDate(appt.date))}</div>
-            <div>${escapeHtml(appt.time)}</div>
+            <div class="appt-pending-time">${escapeHtml(appt.time)}</div>
           </div>
+          <button class="btn-icon btn-paid-toggle is-pending" aria-label="Marcar como cobrada" title="Pendiente de cobro · pulsa para marcar como cobrada">&euro;</button>
         </div>
         <div class="appt-info">
           <div class="appt-name">${escapeHtml(appt.name)}</div>

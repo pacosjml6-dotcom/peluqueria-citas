@@ -589,8 +589,8 @@ button {
 
 .appt-time {
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 13px;
+  font-weight: 800;
+  font-size: 17px;
   color: var(--color-primary-dark);
   min-width: 40px;
   text-align: center;
@@ -1173,6 +1173,13 @@ button {
   font-size: 10px;
   font-weight: 600;
   color: var(--color-text-muted);
+}
+
+.appt-pending-time {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-primary-dark);
 }
 
 .btn-badge {

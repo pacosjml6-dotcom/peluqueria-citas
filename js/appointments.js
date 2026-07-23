@@ -452,8 +452,8 @@ const Appointments = {
       item.className = `appt-item ${overdue ? 'appt-item-overdue' : 'appt-item-upcoming'}${active ? ' appt-item-active' : ''}`;
       item.innerHTML = `
         <div class="appt-time-col">
-          <button class="btn-icon btn-paid-toggle ${appt.paid ? 'is-paid' : 'is-pending'}" aria-label="${appt.paid ? 'Marcar como pendiente de cobro' : 'Marcar como cobrada'}" title="${appt.paid ? 'Cobrada · pulsa para marcar como pendiente' : 'Pendiente de cobro · pulsa para marcar como cobrada'}">&euro;</button>
           <div class="appt-time">${escapeHtml(appt.time)}</div>
+          <button class="btn-icon btn-paid-toggle ${appt.paid ? 'is-paid' : 'is-pending'}" aria-label="${appt.paid ? 'Marcar como pendiente de cobro' : 'Marcar como cobrada'}" title="${appt.paid ? 'Cobrada · pulsa para marcar como pendiente' : 'Pendiente de cobro · pulsa para marcar como cobrada'}">&euro;</button>
         </div>
         <div class="appt-info">
           <div class="appt-name">
