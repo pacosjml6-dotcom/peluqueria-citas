@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const errorPage = document.getElementById('booking-error');
 
   try {
-    await Promise.all([EmployeeStore._load(), ScheduleStore._load()]);
+    await Promise.all([EmployeeStore._load(), ScheduleStore._load(), CompanyStore._load()]);
   } catch (e) {
     console.error('No se pudieron cargar los datos para la reserva', e);
     loading.classList.add('hidden');
@@ -42,6 +42,7 @@ const PublicBooking = {
   init() {
     this.populatePhoneCodeSelect();
     this.populateEmployeeSelect();
+    this.renderCompanyInfo();
 
     document.getElementById('pb-date').min = toISODate(new Date());
     document.getElementById('public-appt-form').addEventListener('submit', (e) => this.handleSubmit(e));
@@ -56,6 +57,19 @@ const PublicBooking = {
     document.getElementById('pb-otp-form').addEventListener('submit', (e) => this.handleVerifyOtp(e));
     document.getElementById('pb-otp-resend').addEventListener('click', () => this.handleResendOtp());
     document.getElementById('pb-otp-back').addEventListener('click', () => this.resetForm());
+  },
+
+  renderCompanyInfo() {
+    const company = CompanyStore.get();
+    const el = document.getElementById('pb-company-info');
+    const parts = [company.name, company.phone].filter(Boolean);
+    if (parts.length === 0) {
+      el.textContent = '';
+      el.classList.add('hidden');
+      return;
+    }
+    el.textContent = parts.join(' · ');
+    el.classList.remove('hidden');
   },
 
   populatePhoneCodeSelect() {

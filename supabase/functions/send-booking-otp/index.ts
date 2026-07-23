@@ -80,6 +80,11 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'rate_limited' }, 429);
   }
 
+  const { data: company } = await admin.from('empresa').select('name, phone').eq('id', true).maybeSingle();
+  const companyLine = company && (company.name || company.phone)
+    ? `<p>${[company.name, company.phone].filter(Boolean).map(escapeHtml).join(' · ')}</p>`
+    : '';
+
   const code = randomCode();
   const codeHash = await sha256Hex(code);
   const expiresAt = new Date(Date.now() + OTP_TTL_SECONDS * 1000).toISOString();
@@ -102,7 +107,8 @@ Deno.serve(async (req) => {
       from: EMAIL_FROM,
       to: email,
       subject: 'Tu código para confirmar la cita',
-      html: `<p>Hola ${escapeHtml(String(payload.name))},</p>
+      html: `${companyLine}
+        <p>Hola ${escapeHtml(String(payload.name))},</p>
         <p>Tu código para confirmar la cita es:</p>
         <p style="font-size:28px;font-weight:700;letter-spacing:4px;">${code}</p>
         <p>Caduca en ${OTP_TTL_SECONDS} segundos. Si no has pedido esta cita, ignora este correo.</p>`,

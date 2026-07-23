@@ -313,6 +313,46 @@ const ScheduleStore = {
   }
 };
 
+/* Datos de la empresa (nombre, teléfono, dirección): fila única en la tabla
+   "empresa", editable desde el botón "Datos de empresa". */
+const DEFAULT_COMPANY = { name: '', phone: '', address: '' };
+
+function companyFromRow(row) {
+  return {
+    name: row.name || '',
+    phone: row.phone || '',
+    address: row.address || '',
+  };
+}
+
+const CompanyStore = {
+  cache: { ...DEFAULT_COMPANY },
+
+  async _load() {
+    // No debe romper la carga del resto de la app si la tabla "empresa"
+    // todavía no existe (falta ejecutar supabase/company-settings.sql):
+    // es un dato opcional/cosmético, a diferencia de citas/horario.
+    try {
+      const { data, error } = await supabaseClient.from('empresa').select('*').eq('id', true).maybeSingle();
+      if (error) throw error;
+      if (data) this.cache = companyFromRow(data);
+    } catch (err) {
+      console.warn('No se pudieron cargar los datos de empresa (¿falta ejecutar supabase/company-settings.sql?)', err);
+    }
+  },
+
+  get() {
+    return this.cache;
+  },
+
+  async save(company) {
+    const row = { id: true, name: company.name || '', phone: company.phone || '', address: company.address || '' };
+    const { error } = await supabaseClient.from('empresa').upsert(row, { onConflict: 'id' });
+    if (error) throw error;
+    this.cache = companyFromRow(row);
+  }
+};
+
 /* Carga inicial de todas las tablas y sincronización en tiempo real entre
    dispositivos: cuando alguien crea/edita/borra algo desde otro navegador,
    recargamos la tabla afectada y avisamos al resto de la app con un evento. */
@@ -325,6 +365,7 @@ const DataStore = {
       ClientStore._load(),
       EmployeeStore._load(),
       ScheduleStore._load(),
+      CompanyStore._load(),
     ]);
   },
 
@@ -401,6 +442,10 @@ const DataStore = {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'horario' }, async () => {
         await ScheduleStore._load();
         window.dispatchEvent(new CustomEvent('horario:changed'));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'empresa' }, async () => {
+        await CompanyStore._load();
+        window.dispatchEvent(new CustomEvent('empresa:changed'));
       })
       .subscribe();
   }

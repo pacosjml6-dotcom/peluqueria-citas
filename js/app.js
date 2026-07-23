@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     Clients.init();
     Employees.init();
     Schedule.init();
+    Company.init();
     Statistics.init();
 
     DataStore.subscribeRealtime();
@@ -96,6 +97,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     window.addEventListener('horario:changed', () => {
       Schedule.renderSummary();
+    });
+    window.addEventListener('empresa:changed', () => {
+      Company.renderHeader();
     });
 
     document.getElementById('btn-today').addEventListener('click', () => {
