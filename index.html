@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=29">
+  <link rel="stylesheet" href="css/styles.css?v=30">
 </head>
 <body>
   <div id="app-loading-overlay" class="app-loading-overlay">
@@ -110,8 +110,17 @@
       <section class="clients-card card">
         <div class="clients-header">
           <h2>Clientes</h2>
+          <div class="clients-search-wrap">
+            <span class="clients-search-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+            </span>
+            <input type="search" id="clients-search" class="clients-search-input" placeholder="Buscar por nombre, teléfono o correo" aria-label="Buscar clientes">
+          </div>
         </div>
-        <div id="clients-list" class="clients-list"></div>
+        <div class="clients-body">
+          <div id="clients-list" class="clients-list"></div>
+          <div id="clients-az-index" class="clients-az-index"></div>
+        </div>
       </section>
     </main>
 
@@ -440,7 +449,7 @@
   <script src="js/calendar.js?v=17"></script>
   <script src="js/schedule.js?v=18"></script>
   <script src="js/appointments.js?v=20"></script>
-  <script src="js/clients.js?v=18"></script>
+  <script src="js/clients.js?v=19"></script>
   <script src="js/employees.js?v=17"></script>
   <script src="js/statistics.js?v=19"></script>
   <script src="js/app.js?v=18"></script>

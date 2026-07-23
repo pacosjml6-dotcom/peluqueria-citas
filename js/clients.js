@@ -1,9 +1,15 @@
 /* CRUD de clientes: modal de formulario, confirmación de borrado y listado */
 const Clients = {
   pendingDeleteId: null,
+  searchTerm: '',
 
   init() {
     this.populateCountrySelect();
+
+    document.getElementById('clients-search').addEventListener('input', (e) => {
+      this.searchTerm = e.target.value;
+      this.renderList();
+    });
 
     document.getElementById('btn-new-client').addEventListener('click', () => this.openForm());
     document.getElementById('btn-close-client-modal').addEventListener('click', () => this.closeForm());
@@ -163,37 +169,94 @@ const Clients = {
     }
   },
 
+  matchesSearch(client, term) {
+    if (!term) return true;
+    const q = term.trim().toLowerCase();
+    if (!q) return true;
+    if (`${client.name} ${client.email}`.toLowerCase().includes(q)) return true;
+    const digitsQ = q.replace(/\D/g, '');
+    if (digitsQ) {
+      const phoneDigits = `${client.dialCode}${client.phoneLocal}`.replace(/\D/g, '');
+      if (phoneDigits.includes(digitsQ)) return true;
+    }
+    return false;
+  },
+
   renderList() {
     const list = document.getElementById('clients-list');
-    const clients = ClientStore.getAll().sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    const azIndexEl = document.getElementById('clients-az-index');
+    const allClients = ClientStore.getAll();
 
-    if (clients.length === 0) {
+    if (allClients.length === 0) {
       list.innerHTML = '<div class="empty-state"><p>No hay clientes dados de alta todavía.</p></div>';
+      azIndexEl.innerHTML = '';
       return;
     }
 
-    list.innerHTML = '';
+    const clients = allClients
+      .filter(c => this.matchesSearch(c, this.searchTerm))
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+
+    if (clients.length === 0) {
+      list.innerHTML = '<div class="empty-state"><p>No se han encontrado clientes con ese criterio de búsqueda.</p></div>';
+      this.renderAzIndex(azIndexEl, new Set());
+      return;
+    }
+
+    const groups = new Map();
     clients.forEach(client => {
-      const countryInfo = COUNTRY_CODES.find(c => c.dial === client.dialCode);
-      const flag = countryInfo ? isoToFlagEmoji(countryInfo.iso) : '';
-      const item = document.createElement('div');
-      item.className = 'client-item';
-      item.innerHTML = `
-        <div class="client-avatar">${escapeHtml(getInitials(client.name))}</div>
-        <div class="client-info">
-          <div class="client-name">${escapeHtml(client.name)}</div>
-          <div class="client-detail">${flag} +${escapeHtml(client.dialCode)} ${escapeHtml(client.phoneLocal)}</div>
-          <div class="client-detail">${escapeHtml(client.email)}</div>
-        </div>
-        <div class="client-actions">
-          <a class="btn-icon btn-whatsapp" href="${whatsappUrl(client.fullPhone)}" target="_blank" rel="noopener" aria-label="Abrir chat de WhatsApp" title="Abrir WhatsApp">${WHATSAPP_ICON_SVG}</a>
-          <button class="btn-icon btn-edit" aria-label="Editar cliente" title="Editar">&#9998;</button>
-          <button class="btn-icon btn-delete" aria-label="Eliminar cliente" title="Eliminar">&#128465;</button>
-        </div>
-      `;
-      item.querySelector('.btn-edit').addEventListener('click', () => this.openForm(client));
-      item.querySelector('.btn-delete').addEventListener('click', () => this.askDelete(client.id));
-      list.appendChild(item);
+      const key = letterKeyFor(client.name);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(client);
+    });
+
+    list.innerHTML = '';
+    groups.forEach((groupClients, letter) => {
+      const header = document.createElement('div');
+      header.className = 'clients-letter-header';
+      header.dataset.letter = letter;
+      header.textContent = letter;
+      list.appendChild(header);
+
+      groupClients.forEach(client => {
+        const countryInfo = COUNTRY_CODES.find(c => c.dial === client.dialCode);
+        const flag = countryInfo ? isoToFlagEmoji(countryInfo.iso) : '';
+        const item = document.createElement('div');
+        item.className = 'client-item';
+        item.innerHTML = `
+          <div class="client-avatar">${escapeHtml(getInitials(client.name))}</div>
+          <div class="client-info">
+            <div class="client-name">${escapeHtml(client.name)}</div>
+            <div class="client-detail">${flag} +${escapeHtml(client.dialCode)} ${escapeHtml(client.phoneLocal)}</div>
+            <div class="client-detail">${escapeHtml(client.email)}</div>
+          </div>
+          <div class="client-actions">
+            <a class="btn-icon btn-whatsapp" href="${whatsappUrl(client.fullPhone)}" target="_blank" rel="noopener" aria-label="Abrir chat de WhatsApp" title="Abrir WhatsApp">${WHATSAPP_ICON_SVG}</a>
+            <button class="btn-icon btn-edit" aria-label="Editar cliente" title="Editar">&#9998;</button>
+            <button class="btn-icon btn-delete" aria-label="Eliminar cliente" title="Eliminar">&#128465;</button>
+          </div>
+        `;
+        item.querySelector('.btn-edit').addEventListener('click', () => this.openForm(client));
+        item.querySelector('.btn-delete').addEventListener('click', () => this.askDelete(client.id));
+        list.appendChild(item);
+      });
+    });
+
+    this.renderAzIndex(azIndexEl, new Set(groups.keys()));
+  },
+
+  renderAzIndex(container, presentLetters) {
+    const letters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '#'];
+    container.innerHTML = letters.map(letter => {
+      const present = presentLetters.has(letter);
+      return `<button type="button" class="clients-az-btn" data-letter="${letter}" title="${letter}" ${present ? '' : 'disabled'}>${letter}</button>`;
+    }).join('');
+
+    container.querySelectorAll('.clients-az-btn:not(:disabled)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = document.querySelector(`.clients-letter-header[data-letter="${btn.dataset.letter}"]`);
+        if (target) target.scrollIntoView({ block: 'start' });
+      });
     });
   }
 };
@@ -205,4 +268,10 @@ function getInitials(name) {
     .slice(0, 2)
     .map(w => w[0].toUpperCase())
     .join('');
+}
+
+function letterKeyFor(name) {
+  const diacritics = new RegExp(`[${String.fromCharCode(0x0300)}-${String.fromCharCode(0x036f)}]`, 'g');
+  const first = (name.trim()[0] || '').normalize('NFD').replace(diacritics, '').toUpperCase();
+  return /[A-Z]/.test(first) ? first : '#';
 }
