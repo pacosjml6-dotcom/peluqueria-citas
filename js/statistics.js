@@ -107,15 +107,19 @@ const Statistics = {
 
     this.renderKpis(appts, employees);
 
+    const selfBookedAppts = appts.filter(a => a.createdByClient);
+
     this.cache.timeline = { buckets: buildTimelineBuckets(appts, range.start, range.end) };
     this.cache.clients = { items: capRankedItems(aggregateByClient(appts)) };
     this.cache.employees = { items: capRankedItems(aggregateByEmployee(appts, employees)) };
     this.cache.services = { items: capRankedItems(aggregateByService(appts)) };
+    this.cache.selfBooked = { items: capRankedItems(aggregateByClient(selfBookedAppts)) };
 
     this.renderSection('timeline');
     this.renderSection('clients');
     this.renderSection('employees');
     this.renderSection('services');
+    this.renderSection('selfBooked');
   },
 
   renderKpis(appts, employees) {
