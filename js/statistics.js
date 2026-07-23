@@ -379,7 +379,7 @@ function initChartTooltip() {
 
 function renderTimelineChart(containerEl, buckets) {
   const max = Math.max(1, ...buckets.map(b => b.value));
-  const trackHeight = 150;
+  const trackHeight = 100;
   const useFixedCols = buckets.length > 20;
   const showEvery = Math.max(1, Math.ceil(buckets.length / 14));
   const rowClass = useFixedCols ? 'vbar-fixed-cols' : '';
