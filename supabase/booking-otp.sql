@@ -39,7 +39,7 @@ create or replace function verify_appointment_otp(p_request_id uuid, p_code text
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_row reserva_otp;
