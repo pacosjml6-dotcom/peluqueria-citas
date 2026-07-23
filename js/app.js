@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     Schedule.init();
     Company.init();
     Backup.init();
+    DataWipe.init();
     Statistics.init();
 
     DataStore.subscribeRealtime();

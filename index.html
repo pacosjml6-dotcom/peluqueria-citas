@@ -74,6 +74,12 @@
             </span>
             <span class="btn-util-label">QR</span>
           </button>
+          <button id="btn-wipe-data" class="btn-util btn-util-danger" type="button" title="Vaciar la base de datos" aria-label="Vaciar base de datos">
+            <span class="btn-icon-inline" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+            </span>
+            <span class="btn-util-label">Vaciar datos</span>
+          </button>
           <span class="header-utilities-divider" aria-hidden="true"></span>
           <button id="btn-logout" class="btn-util btn-util-danger" type="button" title="Cerrar sesión">
             <span class="btn-icon-inline" aria-hidden="true">
@@ -563,6 +569,82 @@
     </div>
   </div>
 
+  <div id="wipe-modal-overlay" class="modal-overlay hidden">
+    <div class="modal modal-sm" role="dialog" aria-modal="true" aria-labelledby="wipe-modal-title">
+      <div class="modal-header">
+        <h3 id="wipe-modal-title">Vaciar base de datos</h3>
+        <button id="btn-close-wipe-modal" class="btn-icon" aria-label="Cerrar">&times;</button>
+      </div>
+
+      <div id="wipe-setup-pin-view">
+        <p class="field-warning">Antes de poder vaciar datos, configura un PIN de seguridad. Se te pedirá cada vez que quieras vaciar la base de datos.</p>
+        <form id="wipe-setup-pin-form" class="appt-form">
+          <label>PIN de seguridad
+            <input type="password" id="wipe-setup-pin" minlength="4" maxlength="20" autocomplete="new-password" required>
+          </label>
+          <label>Confirmar PIN
+            <input type="password" id="wipe-setup-pin-confirm" minlength="4" maxlength="20" autocomplete="new-password" required>
+          </label>
+          <p id="wipe-setup-pin-error" class="field-warning hidden"></p>
+          <div class="form-actions">
+            <div class="form-actions-right">
+              <button type="submit" class="btn btn-primary">Guardar PIN</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div id="wipe-actions-view" class="hidden">
+        <div class="backup-section">
+          <p class="backup-section-title">Vaciar solo las citas</p>
+          <p class="field-hint">Elimina todas las citas. Clientes, empleados, horario y datos de empresa no se modifican.</p>
+          <button type="button" id="btn-wipe-appointments" class="btn btn-danger backup-action-btn">Vaciar solo las citas</button>
+        </div>
+        <div class="backup-section">
+          <p class="backup-section-title">Vaciar todo</p>
+          <p class="field-warning">Elimina todas las citas, clientes y empleados. El horario laboral y los datos de empresa no se modifican. Esta acción no se puede deshacer.</p>
+          <button type="button" id="btn-wipe-everything" class="btn btn-danger backup-action-btn">Vaciar todo</button>
+        </div>
+        <div class="backup-section">
+          <button type="button" id="btn-wipe-change-pin" class="btn btn-ghost backup-action-btn">Cambiar PIN de seguridad</button>
+        </div>
+      </div>
+
+      <div id="wipe-change-pin-view" class="hidden">
+        <form id="wipe-change-pin-form" class="appt-form">
+          <label>PIN actual
+            <input type="password" id="wipe-change-pin-current" autocomplete="current-password" required>
+          </label>
+          <label>Nuevo PIN
+            <input type="password" id="wipe-change-pin-new" minlength="4" maxlength="20" autocomplete="new-password" required>
+          </label>
+          <label>Confirmar nuevo PIN
+            <input type="password" id="wipe-change-pin-new-confirm" minlength="4" maxlength="20" autocomplete="new-password" required>
+          </label>
+          <p id="wipe-change-pin-error" class="field-warning hidden"></p>
+          <div class="form-actions">
+            <button type="button" id="btn-wipe-change-pin-cancel" class="btn btn-ghost">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar nuevo PIN</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="wipe-confirm-view" class="hidden">
+        <p id="wipe-confirm-message" class="confirm-message"></p>
+        <form id="wipe-confirm-form" class="appt-form">
+          <label>Introduce tu PIN de seguridad
+            <input type="password" id="wipe-confirm-pin" autocomplete="off" required>
+          </label>
+          <p id="wipe-confirm-error" class="field-warning hidden"></p>
+          <div class="form-actions">
+            <button type="button" id="btn-wipe-confirm-cancel" class="btn btn-ghost">Cancelar</button>
+            <button type="submit" id="btn-wipe-confirm-submit" class="btn btn-danger">Vaciar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast hidden"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -572,12 +654,13 @@
   <script src="js/schedule.js?v=18"></script>
   <script src="js/company.js?v=1"></script>
   <script src="js/backup.js?v=1"></script>
+  <script src="js/data-wipe.js?v=1"></script>
   <script src="js/appointments.js?v=24"></script>
   <script src="js/day-detail.js?v=2"></script>
   <script src="js/pending-payments.js?v=3"></script>
   <script src="js/clients.js?v=20"></script>
   <script src="js/employees.js?v=17"></script>
   <script src="js/statistics.js?v=19"></script>
-  <script src="js/app.js?v=22"></script>
+  <script src="js/app.js?v=23"></script>
 </body>
 </html>
