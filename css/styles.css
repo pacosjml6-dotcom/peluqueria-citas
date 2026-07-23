@@ -168,6 +168,20 @@ button {
   min-height: 0;
 }
 
+/* Transición suave al cambiar de pestaña (Agenda/Clientes/Empleados/
+   Estadísticas): al quitar la clase "hidden" el contenedor pasa de
+   display:none a visible, y esta animación arranca sola en ese momento. */
+@keyframes view-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.app-main,
+.clients-view,
+.stats-view {
+  animation: view-fade-in 220ms ease;
+}
+
 .app-main {
   display: grid;
   grid-template-columns: 1.3fr 1fr;
