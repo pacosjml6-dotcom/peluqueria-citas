@@ -186,6 +186,7 @@ const Clients = {
           <div class="client-detail">${escapeHtml(client.email)}</div>
         </div>
         <div class="client-actions">
+          <a class="btn-icon btn-whatsapp" href="${whatsappUrl(client.fullPhone)}" target="_blank" rel="noopener" aria-label="Abrir chat de WhatsApp" title="Abrir WhatsApp">${WHATSAPP_ICON_SVG}</a>
           <button class="btn-icon btn-edit" aria-label="Editar cliente" title="Editar">&#9998;</button>
           <button class="btn-icon btn-delete" aria-label="Eliminar cliente" title="Eliminar">&#128465;</button>
         </div>

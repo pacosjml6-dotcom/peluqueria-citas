@@ -286,6 +286,8 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
   transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
 
@@ -293,6 +295,12 @@ button {
   background: var(--color-primary-light);
   color: var(--color-primary-dark);
   border-color: var(--color-primary-light);
+}
+
+.btn-whatsapp:hover {
+  background: #e3f6ea;
+  color: #25d366;
+  border-color: #bdeccd;
 }
 
 /* ==========================================================================

@@ -4,6 +4,16 @@ const SLOT_INTERVAL_MINUTES = 15;
 
 const CLOUD_ICON_SVG = '<svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>';
 
+const WHATSAPP_ICON_SVG = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.6-.6-2.9-1.2-4.7-4.1-4.9-4.3-.1-.2-1.2-1.6-1.2-3 0-1.4.7-2.1 1-2.4.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5.2.5.7 1.8.8 1.9.1.2.1.3 0 .5-.1.2-.2.3-.3.5-.2.2-.3.3-.1.6.2.3.9 1.4 1.9 2.3 1.3 1.1 2.4 1.5 2.7 1.6.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1.2.1 1.5.7 1.8.8.3.1.5.2.5.3.1.2.1.6-.1 1.2z"/></svg>';
+
+/* Enlace de "click to chat" oficial de WhatsApp: abre WhatsApp Web (o la app
+   si no hay sesión de escritorio) con la conversación de ese teléfono ya
+   lista para escribir. Solo necesita el teléfono completo con prefijo. */
+function whatsappUrl(fullPhone) {
+  const digits = String(fullPhone || '').replace(/\D/g, '');
+  return `https://wa.me/${digits}`;
+}
+
 const Appointments = {
   pendingDeleteId: null,
 
@@ -453,6 +463,7 @@ const Appointments = {
           </div>
         </div>
         <div class="appt-actions">
+          <a class="btn-icon btn-whatsapp" href="${whatsappUrl(appt.phone)}" target="_blank" rel="noopener" aria-label="Abrir chat de WhatsApp" title="Abrir WhatsApp">${WHATSAPP_ICON_SVG}</a>
           <button class="btn-icon btn-edit" aria-label="Editar cita" title="Editar">&#9998;</button>
           <button class="btn-icon btn-delete" aria-label="Eliminar cita" title="Eliminar">&#128465;</button>
         </div>
