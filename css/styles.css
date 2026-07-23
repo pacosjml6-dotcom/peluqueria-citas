@@ -806,23 +806,25 @@ button {
 .client-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 8px;
-  border-radius: var(--radius-md);
-  background: var(--color-surface-alt);
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition), border-color var(--transition);
 }
 
 .client-item:hover {
-  box-shadow: var(--shadow-sm);
-  border-color: var(--color-text-muted);
+  box-shadow: var(--shadow-md);
+  border-left-color: var(--color-primary-dark);
 }
 
 .client-avatar {
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   background: var(--color-primary-light);
   color: var(--color-primary-dark);
   display: flex;
