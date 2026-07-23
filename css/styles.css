@@ -371,22 +371,22 @@ button {
    acentua al pasar el raton y se aplana al pulsar, para que destaquen
    sobre el fondo de la cabecera. */
 .app-header .btn {
-  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.16), 0 1px 2px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.22), 0 2px 4px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   transition: background var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
 }
 
 .app-header .btn:hover {
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.20), 0 2px 4px rgba(15, 23, 42, 0.12);
-  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.28), 0 4px 8px rgba(15, 23, 42, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-3px);
 }
 
 .app-header .btn:active {
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
   transform: translateY(0);
 }
 
 .app-header .tabs {
-  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.16), 0 1px 2px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.22), 0 2px 4px rgba(15, 23, 42, 0.16);
 }
 
 /* ==========================================================================
