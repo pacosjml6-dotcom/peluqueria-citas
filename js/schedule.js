@@ -27,11 +27,13 @@ const Schedule = {
     const container = document.getElementById('schedule-days-list');
     container.innerHTML = DAY_LABELS.map((label, idx) => `
       <div class="schedule-day-row" data-day="${idx}">
-        <div class="schedule-day-name">${label}</div>
-        <label class="schedule-closed-toggle">
-          <input type="checkbox" class="schedule-closed-checkbox">
-          Cerrado
-        </label>
+        <div class="schedule-day-row-header">
+          <div class="schedule-day-name">${label}</div>
+          <label class="schedule-closed-toggle">
+            <input type="checkbox" class="schedule-closed-checkbox">
+            Cerrado
+          </label>
+        </div>
         <div class="schedule-shifts">
           <div class="schedule-shift">
             <span class="schedule-shift-label">Mañana</span>
