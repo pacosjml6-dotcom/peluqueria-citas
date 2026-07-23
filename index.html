@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=42">
+  <link rel="stylesheet" href="css/styles.css?v=43">
 </head>
 <body>
   <div id="app-loading-overlay" class="app-loading-overlay">
@@ -594,6 +594,20 @@
         </form>
       </div>
 
+      <div id="wipe-pin-gate-view" class="hidden">
+        <p class="field-warning">Introduce tu PIN de seguridad para continuar.</p>
+        <form id="wipe-pin-gate-form" class="appt-form">
+          <label>PIN de seguridad
+            <input type="password" id="wipe-pin-gate-input" autocomplete="off" required>
+          </label>
+          <p id="wipe-pin-gate-error" class="field-warning hidden"></p>
+          <div class="form-actions">
+            <button type="button" id="btn-wipe-pin-gate-cancel" class="btn btn-ghost">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Continuar</button>
+          </div>
+        </form>
+      </div>
+
       <div id="wipe-actions-view" class="hidden">
         <div class="backup-section">
           <p class="backup-section-title">Vaciar solo las citas</p>
@@ -612,9 +626,6 @@
 
       <div id="wipe-change-pin-view" class="hidden">
         <form id="wipe-change-pin-form" class="appt-form">
-          <label>PIN actual
-            <input type="password" id="wipe-change-pin-current" autocomplete="current-password" required>
-          </label>
           <label>Nuevo PIN
             <input type="password" id="wipe-change-pin-new" minlength="4" maxlength="20" autocomplete="new-password" required>
           </label>
@@ -631,16 +642,10 @@
 
       <div id="wipe-confirm-view" class="hidden">
         <p id="wipe-confirm-message" class="confirm-message"></p>
-        <form id="wipe-confirm-form" class="appt-form">
-          <label>Introduce tu PIN de seguridad
-            <input type="password" id="wipe-confirm-pin" autocomplete="off" required>
-          </label>
-          <p id="wipe-confirm-error" class="field-warning hidden"></p>
-          <div class="form-actions">
-            <button type="button" id="btn-wipe-confirm-cancel" class="btn btn-ghost">Cancelar</button>
-            <button type="submit" id="btn-wipe-confirm-submit" class="btn btn-danger">Vaciar</button>
-          </div>
-        </form>
+        <div class="form-actions">
+          <button type="button" id="btn-wipe-confirm-cancel" class="btn btn-ghost">Cancelar</button>
+          <button type="button" id="btn-wipe-confirm-submit" class="btn btn-danger">Vaciar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -654,7 +659,7 @@
   <script src="js/schedule.js?v=18"></script>
   <script src="js/company.js?v=1"></script>
   <script src="js/backup.js?v=1"></script>
-  <script src="js/data-wipe.js?v=1"></script>
+  <script src="js/data-wipe.js?v=2"></script>
   <script src="js/appointments.js?v=24"></script>
   <script src="js/day-detail.js?v=2"></script>
   <script src="js/pending-payments.js?v=3"></script>

@@ -3,7 +3,12 @@
    son configuración, no datos operativos). Protegido con un PIN de
    seguridad propio de la app (no la contraseña de inicio de sesión):
    se guarda solo su hash SHA-256 en la tabla "app_settings", que no tiene
-   ninguna política de acceso público (a diferencia de "empresa"). */
+   ninguna política de acceso público (a diferencia de "empresa").
+
+   Flujo: si no hay PIN configurado, hay que crearlo antes de nada. Si ya
+   existe, se pide justo al abrir el botón "Vaciar datos" (antes de ver
+   ninguna opción); una vez superado, elegir "solo citas" o "todo" solo
+   pide una confirmación normal, sin volver a teclear el PIN. */
 const DataWipe = {
   pinConfigured: false,
   pendingAction: null,
@@ -21,19 +26,21 @@ const DataWipe = {
     });
 
     document.getElementById('wipe-setup-pin-form').addEventListener('submit', (e) => this.handleSetupPin(e));
+    document.getElementById('wipe-pin-gate-form').addEventListener('submit', (e) => this.handlePinGate(e));
+    document.getElementById('btn-wipe-pin-gate-cancel').addEventListener('click', () => this.closeModal());
     document.getElementById('btn-wipe-appointments').addEventListener('click', () => this.openConfirm('citas'));
     document.getElementById('btn-wipe-everything').addEventListener('click', () => this.openConfirm('todo'));
     document.getElementById('btn-wipe-change-pin').addEventListener('click', () => this.showChangePin());
     document.getElementById('btn-wipe-change-pin-cancel').addEventListener('click', () => this.showActions());
     document.getElementById('wipe-change-pin-form').addEventListener('submit', (e) => this.handleChangePin(e));
     document.getElementById('btn-wipe-confirm-cancel').addEventListener('click', () => this.showActions());
-    document.getElementById('wipe-confirm-form').addEventListener('submit', (e) => this.handleConfirmWipe(e));
+    document.getElementById('btn-wipe-confirm-submit').addEventListener('click', () => this.handleConfirmWipe());
   },
 
   async openModal() {
     await this.refreshPinState();
     this.clearErrors();
-    if (this.pinConfigured) this.showActions(); else this.showSetup();
+    if (this.pinConfigured) this.showPinGate(); else this.showSetup();
     document.getElementById('wipe-modal-overlay').classList.remove('hidden');
   },
 
@@ -41,12 +48,12 @@ const DataWipe = {
     document.getElementById('wipe-modal-overlay').classList.add('hidden');
     this.clearErrors();
     document.getElementById('wipe-setup-pin-form').reset();
+    document.getElementById('wipe-pin-gate-form').reset();
     document.getElementById('wipe-change-pin-form').reset();
-    document.getElementById('wipe-confirm-form').reset();
   },
 
   clearErrors() {
-    ['wipe-setup-pin-error', 'wipe-change-pin-error', 'wipe-confirm-error'].forEach((id) => {
+    ['wipe-setup-pin-error', 'wipe-pin-gate-error', 'wipe-change-pin-error'].forEach((id) => {
       const el = document.getElementById(id);
       el.textContent = '';
       el.classList.add('hidden');
@@ -54,7 +61,7 @@ const DataWipe = {
   },
 
   hideAllViews() {
-    ['wipe-setup-pin-view', 'wipe-actions-view', 'wipe-change-pin-view', 'wipe-confirm-view'].forEach((id) => {
+    ['wipe-setup-pin-view', 'wipe-pin-gate-view', 'wipe-actions-view', 'wipe-change-pin-view', 'wipe-confirm-view'].forEach((id) => {
       document.getElementById(id).classList.add('hidden');
     });
   },
@@ -62,6 +69,12 @@ const DataWipe = {
   showSetup() {
     this.hideAllViews();
     document.getElementById('wipe-setup-pin-view').classList.remove('hidden');
+  },
+
+  showPinGate() {
+    this.hideAllViews();
+    document.getElementById('wipe-pin-gate-view').classList.remove('hidden');
+    document.getElementById('wipe-pin-gate-input').focus();
   },
 
   showActions() {
@@ -83,7 +96,6 @@ const DataWipe = {
     document.getElementById('btn-wipe-confirm-submit').textContent = action === 'citas' ? 'Vaciar citas' : 'Vaciar todo';
     this.hideAllViews();
     document.getElementById('wipe-confirm-view').classList.remove('hidden');
-    document.getElementById('wipe-confirm-pin').focus();
   },
 
   async refreshPinState() {
@@ -95,6 +107,12 @@ const DataWipe = {
       console.error('No se pudo comprobar el PIN de seguridad (¿falta ejecutar supabase/wipe-pin.sql?)', err);
       this.pinConfigured = false;
     }
+  },
+
+  async getStoredPinHash() {
+    const { data, error } = await supabaseClient.from('app_settings').select('wipe_pin_hash').eq('id', true).maybeSingle();
+    if (error) throw error;
+    return data ? data.wipe_pin_hash : null;
   },
 
   async sha256Hex(text) {
@@ -139,9 +157,34 @@ const DataWipe = {
     }
   },
 
+  async handlePinGate(e) {
+    e.preventDefault();
+    const pin = document.getElementById('wipe-pin-gate-input').value;
+    const errorEl = document.getElementById('wipe-pin-gate-error');
+    errorEl.classList.add('hidden');
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    try {
+      const storedHash = await this.getStoredPinHash();
+      const enteredHash = await this.sha256Hex(pin);
+      if (!storedHash || storedHash !== enteredHash) {
+        errorEl.textContent = 'El PIN no es correcto';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      document.getElementById('wipe-pin-gate-form').reset();
+      this.showActions();
+    } catch (err) {
+      console.error('Error comprobando el PIN de seguridad', err);
+      showToast('No se pudo comprobar el PIN. Inténtalo de nuevo.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  },
+
   async handleChangePin(e) {
     e.preventDefault();
-    const current = document.getElementById('wipe-change-pin-current').value;
     const next = document.getElementById('wipe-change-pin-new').value;
     const confirmNext = document.getElementById('wipe-change-pin-new-confirm').value;
     const errorEl = document.getElementById('wipe-change-pin-error');
@@ -161,18 +204,9 @@ const DataWipe = {
     const submitBtn = e.target.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
     try {
-      const { data, error } = await supabaseClient.from('app_settings').select('wipe_pin_hash').eq('id', true).maybeSingle();
-      if (error) throw error;
-      const currentHash = await this.sha256Hex(current);
-      if (!data || data.wipe_pin_hash !== currentHash) {
-        errorEl.textContent = 'El PIN actual no es correcto';
-        errorEl.classList.remove('hidden');
-        return;
-      }
-
       const newHash = await this.sha256Hex(next);
-      const { error: saveError } = await supabaseClient.from('app_settings').update({ wipe_pin_hash: newHash }).eq('id', true);
-      if (saveError) throw saveError;
+      const { error } = await supabaseClient.from('app_settings').update({ wipe_pin_hash: newHash }).eq('id', true);
+      if (error) throw error;
 
       document.getElementById('wipe-change-pin-form').reset();
       showToast('PIN de seguridad actualizado correctamente', 'success');
@@ -185,24 +219,10 @@ const DataWipe = {
     }
   },
 
-  async handleConfirmWipe(e) {
-    e.preventDefault();
-    const pin = document.getElementById('wipe-confirm-pin').value;
-    const errorEl = document.getElementById('wipe-confirm-error');
-    errorEl.classList.add('hidden');
-
+  async handleConfirmWipe() {
     const submitBtn = document.getElementById('btn-wipe-confirm-submit');
     submitBtn.disabled = true;
     try {
-      const { data, error } = await supabaseClient.from('app_settings').select('wipe_pin_hash').eq('id', true).maybeSingle();
-      if (error) throw error;
-      const enteredHash = await this.sha256Hex(pin);
-      if (!data || data.wipe_pin_hash !== enteredHash) {
-        errorEl.textContent = 'El PIN no es correcto';
-        errorEl.classList.remove('hidden');
-        return;
-      }
-
       if (this.pendingAction === 'citas') {
         await this.wipeAppointmentsOnly();
         showToast('Todas las citas se han eliminado', 'success');
@@ -210,8 +230,6 @@ const DataWipe = {
         await this.wipeEverything();
         showToast('Citas, clientes y empleados se han eliminado', 'success');
       }
-
-      document.getElementById('wipe-confirm-form').reset();
       this.closeModal();
     } catch (err) {
       console.error('Error vaciando la base de datos', err);
