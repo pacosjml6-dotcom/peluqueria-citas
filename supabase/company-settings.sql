@@ -13,7 +13,7 @@ create table if not exists empresa (
   constraint empresa_singleton check (id)
 );
 
-insert into empresa (id, name, phone, address) values (true, '', '', '')
+insert into empresa (id, name, phone, address) values (true, 'FJML', '630431853', '')
 on conflict (id) do nothing;
 
 alter table empresa enable row level security;
