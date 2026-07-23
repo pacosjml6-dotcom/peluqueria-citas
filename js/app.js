@@ -65,11 +65,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     Appointments.init();
     DayDetail.init();
+    PendingPayments.init();
     Calendar.init((dateStr) => {
       Appointments.renderList(dateStr);
       DayDetail.open(dateStr);
     });
     Appointments.renderList(Calendar.selectedDate);
+    PendingPayments.updateBadge();
     Clients.init();
     Employees.init();
     Schedule.init();
@@ -80,6 +82,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('citas:changed', () => {
       Calendar.render();
       Appointments.renderList(Calendar.selectedDate);
+      PendingPayments.updateBadge();
+      if (PendingPayments.isOpen()) PendingPayments.render();
       if (!document.getElementById('view-statistics').classList.contains('hidden')) Statistics.renderAll();
     });
     window.addEventListener('clientes:changed', () => {

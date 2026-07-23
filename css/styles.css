@@ -1124,6 +1124,45 @@ button {
 .day-slot-muted .day-slot-time,
 .day-slot-muted .day-slot-name { color: var(--color-text-muted); }
 
+/* ==========================================================================
+   Citas pendientes de cobro
+   ========================================================================== */
+.pending-payments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.appt-item-pending-row .appt-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 46px;
+}
+
+.appt-pending-date {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.btn-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .appt-form {
   display: flex;
   flex-direction: column;

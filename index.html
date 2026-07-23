@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=33">
+  <link rel="stylesheet" href="css/styles.css?v=34">
 </head>
 <body>
   <div id="app-loading-overlay" class="app-loading-overlay">
@@ -70,6 +70,11 @@
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M14 14h3v3h-3z"></path><path d="M20 14v3"></path><path d="M14 20h3"></path></svg>
         </span>
         QR
+      </button>
+      <button id="btn-pending-payments" class="btn btn-ghost" type="button" title="Ver citas pendientes de cobro">
+        <span class="btn-icon-inline" aria-hidden="true">&euro;</span>
+        Pendientes de cobro
+        <span id="pending-payments-badge" class="btn-badge hidden">0</span>
       </button>
       <button id="btn-logout" class="btn btn-danger">Cerrar sesión</button>
     </header>
@@ -315,6 +320,16 @@
     </div>
   </div>
 
+  <div id="pending-payments-overlay" class="modal-overlay hidden">
+    <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="pending-payments-title">
+      <div class="modal-header">
+        <h3 id="pending-payments-title">Citas pendientes de cobro</h3>
+        <button id="btn-close-pending-payments" class="btn-icon" aria-label="Cerrar">&times;</button>
+      </div>
+      <div id="pending-payments-list" class="pending-payments-list"></div>
+    </div>
+  </div>
+
   <div id="confirm-overlay" class="modal-overlay hidden">
     <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
       <h3 id="confirm-title">¿Eliminar cita?</h3>
@@ -464,9 +479,10 @@
   <script src="js/schedule.js?v=18"></script>
   <script src="js/appointments.js?v=21"></script>
   <script src="js/day-detail.js?v=1"></script>
+  <script src="js/pending-payments.js?v=1"></script>
   <script src="js/clients.js?v=20"></script>
   <script src="js/employees.js?v=17"></script>
   <script src="js/statistics.js?v=19"></script>
-  <script src="js/app.js?v=19"></script>
+  <script src="js/app.js?v=20"></script>
 </body>
 </html>
