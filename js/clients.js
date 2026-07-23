@@ -2,6 +2,7 @@
 const Clients = {
   pendingDeleteId: null,
   searchTerm: '',
+  selectedLetter: null,
 
   init() {
     this.populateCountrySelect();
@@ -193,13 +194,17 @@ const Clients = {
       return;
     }
 
-    const clients = allClients
-      .filter(c => this.matchesSearch(c, this.searchTerm))
+    const searchMatched = allClients.filter(c => this.matchesSearch(c, this.searchTerm));
+    const presentLetters = new Set(searchMatched.map(c => letterKeyFor(c.name)));
+    if (this.selectedLetter && !presentLetters.has(this.selectedLetter)) this.selectedLetter = null;
+
+    const clients = searchMatched
+      .filter(c => !this.selectedLetter || letterKeyFor(c.name) === this.selectedLetter)
       .sort((a, b) => a.name.localeCompare(b.name, 'es'));
 
     if (clients.length === 0) {
       list.innerHTML = '<div class="empty-state"><p>No se han encontrado clientes con ese criterio de búsqueda.</p></div>';
-      this.renderAzIndex(azIndexEl, new Set());
+      this.renderAzIndex(azIndexEl, presentLetters);
       return;
     }
 
@@ -242,20 +247,21 @@ const Clients = {
       });
     });
 
-    this.renderAzIndex(azIndexEl, new Set(groups.keys()));
+    this.renderAzIndex(azIndexEl, presentLetters);
   },
 
   renderAzIndex(container, presentLetters) {
     const letters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '#'];
     container.innerHTML = letters.map(letter => {
       const present = presentLetters.has(letter);
-      return `<button type="button" class="clients-az-btn" data-letter="${letter}" title="${letter}" ${present ? '' : 'disabled'}>${letter}</button>`;
+      const active = this.selectedLetter === letter;
+      return `<button type="button" class="clients-az-btn${active ? ' is-active' : ''}" data-letter="${letter}" title="${letter}" ${present ? '' : 'disabled'}>${letter}</button>`;
     }).join('');
 
     container.querySelectorAll('.clients-az-btn:not(:disabled)').forEach(btn => {
       btn.addEventListener('click', () => {
-        const target = document.querySelector(`.clients-letter-header[data-letter="${btn.dataset.letter}"]`);
-        if (target) target.scrollIntoView({ block: 'start' });
+        this.selectedLetter = this.selectedLetter === btn.dataset.letter ? null : btn.dataset.letter;
+        this.renderList();
       });
     });
   }

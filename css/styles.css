@@ -843,20 +843,20 @@ button {
   align-items: center;
   justify-content: space-between;
   flex: 0 0 auto;
-  width: 16px;
+  width: 24px;
   padding: 2px 0;
 }
 
 .clients-az-btn {
   width: 100%;
-  font-size: 9px;
+  font-size: 13px;
   line-height: 1;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  padding: 1.5px 0;
+  font-weight: 800;
+  color: var(--color-primary);
+  padding: 2px 0;
   border: none;
   background: transparent;
-  border-radius: 3px;
+  border-radius: 4px;
   transition: color var(--transition), background var(--transition);
 }
 
@@ -864,6 +864,11 @@ button {
   color: #fff;
   background: var(--color-primary);
   cursor: pointer;
+}
+
+.clients-az-btn.is-active {
+  color: #fff;
+  background: var(--color-primary-dark);
 }
 
 .clients-az-btn:disabled {
