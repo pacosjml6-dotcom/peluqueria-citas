@@ -364,6 +364,29 @@ button {
 .tab-btn.active {
   background: var(--color-primary);
   color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Relieve en los botones de la barra superior: sombra sutil que se
+   acentua al pasar el raton y se aplana al pulsar, para que destaquen
+   sobre el fondo de la cabecera. */
+.app-header .btn {
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.app-header .btn:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.app-header .btn:active {
+  box-shadow: none;
+  transform: translateY(0);
+}
+
+.app-header .tabs {
+  box-shadow: var(--shadow-sm);
 }
 
 /* ==========================================================================
