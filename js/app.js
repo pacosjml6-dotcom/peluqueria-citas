@@ -64,7 +64,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadingOverlay.classList.add('hidden');
 
     Appointments.init();
-    Calendar.init((dateStr) => Appointments.renderList(dateStr));
+    DayDetail.init();
+    Calendar.init((dateStr) => {
+      Appointments.renderList(dateStr);
+      DayDetail.open(dateStr);
+    });
     Appointments.renderList(Calendar.selectedDate);
     Clients.init();
     Employees.init();

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=31">
+  <link rel="stylesheet" href="css/styles.css?v=32">
 </head>
 <body>
   <div id="app-loading-overlay" class="app-loading-overlay">
@@ -301,6 +301,20 @@
     </div>
   </div>
 
+  <div id="day-detail-overlay" class="modal-overlay hidden">
+    <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="day-detail-title">
+      <div class="modal-header">
+        <h3 id="day-detail-title">Detalle del día</h3>
+        <button id="btn-close-day-detail" class="btn-icon" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="day-detail-legend">
+        <span class="day-detail-legend-item"><span class="day-detail-dot day-detail-dot-busy"></span>Ocupado</span>
+        <span class="day-detail-legend-item"><span class="day-detail-dot day-detail-dot-free"></span>Libre</span>
+      </div>
+      <div id="day-detail-body" class="day-detail-body"></div>
+    </div>
+  </div>
+
   <div id="confirm-overlay" class="modal-overlay hidden">
     <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
       <h3 id="confirm-title">¿Eliminar cita?</h3>
@@ -449,9 +463,10 @@
   <script src="js/calendar.js?v=17"></script>
   <script src="js/schedule.js?v=18"></script>
   <script src="js/appointments.js?v=20"></script>
+  <script src="js/day-detail.js?v=1"></script>
   <script src="js/clients.js?v=20"></script>
   <script src="js/employees.js?v=17"></script>
   <script src="js/statistics.js?v=19"></script>
-  <script src="js/app.js?v=18"></script>
+  <script src="js/app.js?v=19"></script>
 </body>
 </html>
