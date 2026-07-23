@@ -552,9 +552,17 @@ button {
 
 .appt-client-badge {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   vertical-align: middle;
-  margin-left: 4px;
-  color: var(--color-primary);
+  margin-left: 5px;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--color-primary-light);
 }
 
 .appt-notes {
