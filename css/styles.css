@@ -24,6 +24,14 @@
   --shadow-md: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
   --shadow-lg: 0 4px 16px rgba(15, 23, 42, 0.10);
 
+  /* Relieve marcado para botones: mas presencia en reposo y un salto claro
+     al pasar el raton, con una curva "muelle" para que la animacion se
+     sienta viva en vez de plana. */
+  --shadow-btn-rest: 0 2px 4px rgba(15, 23, 42, 0.14), 0 1px 2px rgba(15, 23, 42, 0.10);
+  --shadow-btn-hover: 0 10px 20px rgba(15, 23, 42, 0.22), 0 4px 8px rgba(15, 23, 42, 0.14);
+  --shadow-btn-active: 0 1px 2px rgba(15, 23, 42, 0.18);
+  --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
   --transition: 150ms ease;
   --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -177,19 +185,19 @@ button {
   font-weight: 600;
   padding: 7px 12px;
   border-radius: var(--radius-sm);
-  transition: background var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
+  transition: background var(--transition), color var(--transition), box-shadow 200ms ease, transform 250ms var(--bounce);
 }
 
 .btn-util:hover {
   background: var(--color-surface);
   color: var(--color-text);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  box-shadow: var(--shadow-btn-hover);
+  transform: translateY(-2px);
 }
 
 .btn-util:active {
-  box-shadow: none;
-  transform: translateY(0) scale(0.96);
+  box-shadow: var(--shadow-btn-active);
+  transform: translateY(0) scale(0.95);
 }
 
 .btn-util-danger {
@@ -319,21 +327,21 @@ button {
   padding: 9px 16px;
   font-size: 14px;
   font-weight: 600;
-  transition: background var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
+  transition: background var(--transition), border-color var(--transition), color var(--transition), box-shadow 200ms ease, transform 250ms var(--bounce);
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-btn-rest);
 }
 
 .btn:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-btn-hover);
+  transform: translateY(-3px);
 }
 
 .btn:active {
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.14);
-  transform: translateY(0) scale(0.97);
+  box-shadow: var(--shadow-btn-active);
+  transform: translateY(-1px) scale(0.96);
 }
 
 .btn:disabled {
@@ -386,21 +394,21 @@ button {
   justify-content: center;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: background var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  box-shadow: var(--shadow-btn-rest);
+  transition: background var(--transition), color var(--transition), border-color var(--transition), box-shadow 200ms ease, transform 250ms var(--bounce);
 }
 
 .btn-icon:hover {
   background: var(--color-primary-light);
   color: var(--color-primary-dark);
   border-color: var(--color-primary-light);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  box-shadow: var(--shadow-btn-hover);
+  transform: translateY(-2px) scale(1.06);
 }
 
 .btn-icon:active {
-  box-shadow: none;
-  transform: translateY(0) scale(0.94);
+  box-shadow: var(--shadow-btn-active);
+  transform: translateY(0) scale(0.92);
 }
 
 .btn-whatsapp:hover {
@@ -463,7 +471,7 @@ button {
 .tab-btn.active {
   background: var(--color-primary);
   color: #fff;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   transform: translateY(-1px);
 }
 
@@ -471,15 +479,16 @@ button {
   transform: translateY(-1px);
 }
 
-/* El CTA principal (Nueva cita/cliente/empleado) usa el mismo relieve que
-   el resto de botones (.btn) pero con más sombra en reposo, para que siga
-   destacando como acción primaria sobre la fila de pestañas. */
+/* El CTA principal (Nueva cita/cliente/empleado) lleva el relieve más
+   marcado de toda la app, con un tinte del color primario en la sombra,
+   para que destaque claramente como acción principal. */
 .header-actions .btn {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.28), 0 2px 4px rgba(15, 23, 42, 0.14);
 }
 
 .header-actions .btn:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.32), 0 6px 12px rgba(15, 23, 42, 0.16);
+  transform: translateY(-4px);
 }
 
 /* ==========================================================================
@@ -1016,14 +1025,14 @@ button {
   border: none;
   background: transparent;
   border-radius: 4px;
-  transition: color var(--transition), background var(--transition), box-shadow var(--transition), transform var(--transition);
+  transition: color var(--transition), background var(--transition), box-shadow 200ms ease, transform 250ms var(--bounce);
 }
 
 .clients-az-btn:hover:not(:disabled) {
   color: #fff;
   background: var(--color-primary);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px) scale(1.1);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px) scale(1.18);
   cursor: pointer;
 }
 
@@ -1034,7 +1043,7 @@ button {
 .clients-az-btn.is-active {
   color: #fff;
   background: var(--color-primary-dark);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .clients-az-btn:disabled {
@@ -1494,14 +1503,14 @@ button {
   justify-content: center;
   cursor: pointer;
   color: var(--color-text-muted);
-  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  transition: border-color var(--transition), box-shadow 200ms ease, transform 250ms var(--bounce);
 }
 
 .avatar-picker:hover {
   border-color: var(--color-primary);
   color: var(--color-primary-dark);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px) scale(1.03);
+  box-shadow: var(--shadow-btn-hover);
+  transform: translateY(-3px) scale(1.06);
 }
 
 .avatar-picker:active {
@@ -1711,17 +1720,17 @@ button {
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text-muted);
-  transition: background var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
+  transition: background var(--transition), color var(--transition), box-shadow 200ms ease, transform 250ms var(--bounce);
 }
 
-.filter-preset-btn:hover { color: var(--color-text); transform: translateY(-1px); }
+.filter-preset-btn:hover { color: var(--color-text); box-shadow: var(--shadow-md); transform: translateY(-2px); }
 
-.filter-preset-btn:active { transform: translateY(0) scale(0.96); }
+.filter-preset-btn:active { transform: translateY(0) scale(0.95); }
 
 .filter-preset-btn.active {
   background: var(--color-primary);
   color: #fff;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   transform: translateY(-1px);
 }
 
