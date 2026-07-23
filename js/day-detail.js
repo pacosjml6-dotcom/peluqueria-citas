@@ -43,9 +43,15 @@ const DayDetail = {
       return;
     }
 
-    const segments = this.buildSegments(dateStr, ranges);
+    const isPastDay = dateStr < toISODate(new Date());
+    let segments = this.buildSegments(dateStr, ranges);
+    if (isPastDay) segments = segments.filter(seg => seg.type === 'busy');
 
     body.innerHTML = '';
+    if (segments.length === 0) {
+      body.innerHTML = '<div class="empty-state"><p>No hay citas registradas para este día.</p></div>';
+      return;
+    }
     segments.forEach(seg => this.renderSegment(body, seg));
   },
 

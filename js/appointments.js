@@ -433,6 +433,9 @@ const Appointments = {
 
     title.textContent = dateStr === todayStr ? 'Agenda de hoy' : `Agenda del ${formatDate(dateStr)}`;
 
+    const newApptBtn = document.getElementById('btn-new-appt');
+    if (newApptBtn) newApptBtn.disabled = dateStr < todayStr;
+
     if (appts.length === 0) {
       list.innerHTML = '<div class="empty-state"><p>No hay citas programadas para este día.</p></div>';
       return;
