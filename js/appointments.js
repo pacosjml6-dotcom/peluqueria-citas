@@ -450,28 +450,38 @@ const Appointments = {
       item.innerHTML = `
         <div class="appt-time">${escapeHtml(appt.time)}</div>
         <div class="appt-info">
-          <div class="appt-row-top">
-            <div class="appt-name">
-              ${escapeHtml(appt.name)}
-              ${appt.createdByClient ? `<span class="appt-client-badge" title="Reservada por el cliente" aria-label="Reservada por el cliente">${CLOUD_ICON_SVG}</span>` : ''}
-            </div>
-            <div class="appt-phone">${escapeHtml(appt.phone)}</div>
+          <div class="appt-name">
+            ${escapeHtml(appt.name)}
+            ${appt.createdByClient ? `<span class="appt-client-badge" title="Reservada por el cliente" aria-label="Reservada por el cliente">${CLOUD_ICON_SVG}</span>` : ''}
           </div>
+          <div class="appt-phone">${escapeHtml(appt.phone)}</div>
           <div class="appt-row-bottom">
             <div class="appt-notes">${escapeHtml(appt.notes || 'Sin notas')}</div>
             ${employee ? `<div class="appt-employee">${escapeHtml(employee.name)}</div>` : ''}
           </div>
         </div>
         <div class="appt-actions">
+          <button class="btn-icon btn-paid-toggle ${appt.paid ? 'is-paid' : 'is-pending'}" aria-label="${appt.paid ? 'Marcar como pendiente de cobro' : 'Marcar como cobrada'}" title="${appt.paid ? 'Cobrada · pulsa para marcar como pendiente' : 'Pendiente de cobro · pulsa para marcar como cobrada'}">&euro;</button>
           <a class="btn-icon btn-whatsapp" href="${whatsappUrl(appt.phone)}" target="_blank" rel="noopener" aria-label="Abrir chat de WhatsApp" title="Abrir WhatsApp">${WHATSAPP_ICON_SVG}</a>
           <button class="btn-icon btn-edit" aria-label="Editar cita" title="Editar">&#9998;</button>
           <button class="btn-icon btn-delete" aria-label="Eliminar cita" title="Eliminar">&#128465;</button>
         </div>
       `;
+      item.querySelector('.btn-paid-toggle').addEventListener('click', () => this.togglePaid(appt));
       item.querySelector('.btn-edit').addEventListener('click', () => this.openForm(appt));
       item.querySelector('.btn-delete').addEventListener('click', () => this.askDelete(appt.id));
       list.appendChild(item);
     });
+  },
+
+  async togglePaid(appt) {
+    try {
+      const updated = await Store.update(appt.id, { paid: !appt.paid });
+      this.renderList(updated.date);
+    } catch (err) {
+      console.error('Error actualizando el estado de pago', err);
+      showToast('No se pudo actualizar el estado de pago. Inténtalo de nuevo.', 'error');
+    }
   }
 };
 

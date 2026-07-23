@@ -311,6 +311,22 @@ button {
   border-color: #bdeccd;
 }
 
+.btn-paid-toggle { font-weight: 700; font-size: 15px; }
+
+.btn-paid-toggle.is-paid {
+  color: var(--color-success);
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.35);
+}
+.btn-paid-toggle.is-paid:hover { background: rgba(22, 163, 74, 0.2); }
+
+.btn-paid-toggle.is-pending {
+  color: var(--color-danger);
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.35);
+}
+.btn-paid-toggle.is-pending:hover { background: rgba(220, 38, 38, 0.2); }
+
 /* ==========================================================================
    Pestañas de navegación
    ========================================================================== */
@@ -566,7 +582,6 @@ button {
   flex-direction: column;
 }
 
-.appt-row-top,
 .appt-row-bottom {
   display: flex;
   align-items: baseline;
@@ -611,7 +626,7 @@ button {
   font-size: 11px;
   color: var(--color-text-muted);
   white-space: nowrap;
-  flex: 0 0 auto;
+  margin-top: 1px;
 }
 
 .appt-employee {
@@ -1397,7 +1412,7 @@ button {
   .agenda-header h2, .schedule-header h2, .clients-header h2 { font-size: 15px; }
 
   .appt-item { padding: 7px 8px; }
-  .appt-row-top, .appt-row-bottom { gap: 6px; }
+  .appt-row-bottom { gap: 6px; }
 
   .clients-list { gap: 8px; }
   .client-item { padding: 10px; gap: 10px; }
