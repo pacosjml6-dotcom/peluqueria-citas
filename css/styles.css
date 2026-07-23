@@ -186,7 +186,7 @@ button {
 
 .app-main {
   display: grid;
-  grid-template-columns: 1.3fr 1fr;
+  grid-template-columns: 1fr 1.2fr;
   gap: 24px;
   align-items: stretch;
   min-height: 0;
@@ -210,9 +210,14 @@ button {
 .agenda-col-left {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   min-height: 0;
   overflow-y: auto;
+}
+
+.calendar-card,
+.schedule-card {
+  padding: 16px;
 }
 
 .agenda-card {
@@ -342,11 +347,11 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 
 .calendar-header h2 {
-  font-size: 20px;
+  font-size: 16px;
   text-transform: capitalize;
   color: var(--color-text);
 }
@@ -355,18 +360,18 @@ button {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 
 .calendar-day {
@@ -429,19 +434,19 @@ button {
 
 .calendar-day.is-selected .day-number { color: #fff; font-weight: 700; }
 
-.day-number { font-size: 14px; }
+.day-number { font-size: 12px; }
 
 .day-badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
+  top: 3px;
+  right: 3px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
   border-radius: 999px;
   background: var(--color-accent);
   color: #fff;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -633,28 +638,28 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .schedule-header h2 {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .schedule-summary {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .schedule-summary-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding: 6px 9px;
   border-radius: var(--radius-sm);
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .schedule-summary-day {
@@ -788,7 +793,7 @@ button {
 .clients-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -798,8 +803,8 @@ button {
 .client-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px;
+  gap: 10px;
+  padding: 10px;
   border-radius: var(--radius-md);
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
@@ -812,8 +817,8 @@ button {
 }
 
 .client-avatar {
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: var(--color-primary-light);
   color: var(--color-primary-dark);
@@ -821,7 +826,7 @@ button {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   flex: 0 0 auto;
 }
 
@@ -829,24 +834,24 @@ button {
 
 .client-name {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   margin-bottom: 2px;
 }
 
 .client-detail {
-  font-size: 12.5px;
+  font-size: 11.5px;
   color: var(--color-text-muted);
 }
 
 .client-actions {
   display: flex;
-  gap: 6px;
+  gap: 5px;
 }
 
 .client-actions .btn-icon {
-  width: 30px;
-  height: 30px;
-  font-size: 14px;
+  width: 27px;
+  height: 27px;
+  font-size: 12.5px;
 }
 
 /* ==========================================================================
