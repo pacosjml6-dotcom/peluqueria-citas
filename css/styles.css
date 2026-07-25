@@ -1852,7 +1852,7 @@ button {
 
 .stats-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
 }
 
@@ -1863,22 +1863,49 @@ button {
   padding: 14px 16px;
 }
 
+.stats-kpi-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .stats-kpi-icon {
-  width: 52px;
-  height: 52px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-md);
   background: var(--color-primary-light);
-  border: 2px solid var(--color-primary);
+  border: 1.5px solid var(--color-primary);
   color: var(--color-primary-dark);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 6px;
+  flex: 0 0 auto;
 }
+
+.stats-kpi-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.stats-kpi-delta-up { color: var(--color-success); background: rgba(22, 163, 74, 0.12); }
+.stats-kpi-delta-down { color: var(--color-danger); background: rgba(220, 38, 38, 0.12); }
+.stats-kpi-delta-flat { color: var(--color-text-muted); background: var(--color-surface-alt); }
+
+.stats-kpi-delta-arrow { flex: 0 0 auto; }
+.stats-kpi-delta-down .stats-kpi-delta-arrow { transform: rotate(180deg); }
 
 .stats-kpi-value {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--color-text);
   line-height: 1.15;
@@ -1910,29 +1937,39 @@ button {
 
 .stats-chart-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .stats-chart-header h3 {
   font-size: 15px;
 }
 
+.stats-chart-subtitle {
+  margin: 2px 0 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
 .stats-chart-header .btn {
   padding: 6px 12px;
   font-size: 12px;
   flex: 0 0 auto;
+  margin-top: 1px;
 }
 
 .stats-chart-body { min-height: 32px; }
 
-/* Gráfico de barras horizontales (ranking) */
+/* Gráfico de barras horizontales (ranking): un único tono de acento para
+   todas las barras (la magnitud es el dato, no la identidad de cada fila),
+   salvo el grupo "Otros", que va en el gris de desénfasis. */
 .hbar-chart {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 10px;
 }
 
 .hbar-row {
@@ -1940,6 +1977,20 @@ button {
   grid-template-columns: 110px 1fr 28px;
   align-items: center;
   gap: 8px;
+  padding: 3px 4px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+
+.hbar-row:hover,
+.hbar-row:focus-visible {
+  background: var(--color-surface-alt);
+  outline: none;
+}
+
+.hbar-row:hover .hbar-fill,
+.hbar-row:focus-visible .hbar-fill {
+  filter: brightness(1.1);
 }
 
 .hbar-label {
@@ -1953,17 +2004,18 @@ button {
 
 .hbar-track {
   position: relative;
-  height: 9px;
-  border-radius: 999px;
+  height: 10px;
+  border-radius: 0 4px 4px 0;
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border);
+  border-left: none;
   overflow: hidden;
 }
 
 .hbar-fill {
   height: 100%;
-  border-radius: 999px;
-  transition: width 320ms ease;
+  border-radius: 0 4px 4px 0;
+  transition: width 320ms ease, filter var(--transition);
 }
 
 .hbar-value {
@@ -1974,77 +2026,98 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-/* Gráfico de barras verticales (evolución temporal) */
-.vbar-chart {
-  display: flex;
-  gap: 10px;
+/* Evolución temporal: línea + área en SVG (una sola serie, un solo tono) */
+.timeline-chart {
+  width: 100%;
 }
 
-.vbar-axis {
-  display: flex;
-  align-items: flex-start;
-  min-width: 22px;
+.timeline-chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
 }
 
-.vbar-axis-max {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-text-muted);
+.tl-grid {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.tl-axis-label {
+  font-size: 10px;
+  fill: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }
 
-.vbar-body {
-  flex: 1;
-  min-width: 0;
-  overflow-x: auto;
-  padding-bottom: 2px;
+.tl-area {
+  fill: var(--chart-series-1);
+  opacity: 0.12;
+  stroke: none;
 }
 
-.vbar-tracks-row {
+.tl-line {
+  fill: none;
+  stroke: var(--chart-series-1);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.tl-end-dot {
+  fill: var(--chart-series-1);
+  stroke: var(--color-surface);
+  stroke-width: 2;
+}
+
+.tl-end-label {
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.tl-crosshair {
+  stroke: var(--color-text-muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.tl-hover-dot {
+  fill: var(--chart-series-1);
+  stroke: var(--color-surface);
+  stroke-width: 2;
+}
+
+.tl-crosshair.hidden,
+.tl-hover-dot.hidden {
+  display: none;
+}
+
+.tl-hit {
+  cursor: default;
+}
+
+/* Periodo de un solo punto (p.ej. "Hoy"): sin línea posible, se muestra el valor solo */
+.timeline-single {
   display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  border-bottom: 1px solid var(--color-border);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 24px 0;
 }
 
-.vbar-col {
-  position: relative;
-  flex: 1 1 0;
-  min-width: 16px;
-  height: 100%;
-  display: flex;
-  align-items: flex-end;
+.timeline-single-value {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1;
 }
 
-.vbar-tracks-row.vbar-fixed-cols .vbar-col,
-.vbar-labels-row.vbar-fixed-cols .vbar-col-label {
-  flex: 0 0 24px;
-  width: 24px;
-}
-
-.vbar-fill {
-  width: 100%;
-  min-height: 2px;
-  border-radius: 4px 4px 0 0;
-  background: var(--chart-series-1);
-  transition: height 320ms ease;
-}
-
-.vbar-labels-row {
-  display: flex;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.vbar-col-label {
-  flex: 1 1 0;
-  min-width: 16px;
-  font-size: 10px;
+.timeline-single-label {
+  font-size: 13px;
   color: var(--color-text-muted);
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* Tooltip genérico al pasar el ratón (posicionado por JS, con position:fixed

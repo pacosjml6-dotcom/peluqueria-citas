@@ -1,4 +1,6 @@
-/* Estadísticas: filtro de periodo, KPIs y gráficos (citas por cliente, empleado, servicio y evolución temporal) */
+/* Estadísticas: filtro de periodo, KPIs (con comparación frente al periodo
+   anterior) y gráficos (citas por cliente, empleado, servicio y evolución
+   temporal) */
 const STATS_PRESETS = [
   { id: 'today', label: 'Hoy' },
   { id: '7d', label: '7 días' },
@@ -105,7 +107,15 @@ const Statistics = {
         ? `No hay citas registradas entre el ${formatStatsDate(range.start)} y el ${formatStatsDate(range.end)}.`
         : `Mostrando ${appts.length} cita${appts.length === 1 ? '' : 's'} del ${formatStatsDate(range.start)} al ${formatStatsDate(range.end)}.`;
 
-    this.renderKpis(appts, employees);
+    // El preset "Todo" abarca toda la historia registrada, así que no existe
+    // un "periodo anterior" con el que compararlo de forma significativa.
+    let previousAppts = null;
+    if (this.currentPreset !== 'all') {
+      const previousRange = getPreviousRange(range);
+      previousAppts = Store.getAll().filter(a => a.date >= previousRange.start && a.date <= previousRange.end);
+    }
+
+    this.renderKpis(appts, employees, previousAppts);
 
     const selfBookedAppts = appts.filter(a => a.createdByClient);
 
@@ -122,15 +132,21 @@ const Statistics = {
     this.renderSection('selfBooked');
   },
 
-  renderKpis(appts, employees) {
-    document.getElementById('stats-kpi-total-appts').textContent = appts.length;
+  renderKpis(appts, employees, previousAppts) {
+    const total = appts.length;
+    document.getElementById('stats-kpi-total-appts').textContent = total;
     document.getElementById('stats-kpi-total-appts-sub').textContent =
-      appts.length === 0 ? 'Sin datos en el periodo' : 'en el periodo seleccionado';
+      total === 0 ? 'Sin datos en el periodo' : 'en el periodo seleccionado';
+    this.renderKpiDelta('stats-kpi-total-appts-delta', total, previousAppts ? previousAppts.length : null);
 
     const uniqueClients = new Set(appts.map(a => a.clientId || a.name)).size;
     document.getElementById('stats-kpi-clients').textContent = uniqueClients;
     document.getElementById('stats-kpi-clients-sub').textContent =
       uniqueClients === 0 ? 'Sin datos en el periodo' : 'clientes distintos atendidos';
+    const prevUniqueClients = previousAppts
+      ? new Set(previousAppts.map(a => a.clientId || a.name)).size
+      : null;
+    this.renderKpiDelta('stats-kpi-clients-delta', uniqueClients, prevUniqueClients);
 
     const services = aggregateByService(appts);
     const topService = services[0];
@@ -150,6 +166,37 @@ const Statistics = {
       appts.length === 0
         ? 'Sin datos en el periodo'
         : `${Math.round((clientBooked / appts.length) * 100)}% del total`;
+    const prevClientBooked = previousAppts ? previousAppts.filter(a => a.createdByClient).length : null;
+    this.renderKpiDelta('stats-kpi-client-booked-delta', clientBooked, prevClientBooked);
+  },
+
+  /* Compara con el periodo inmediatamente anterior de igual duración.
+     "previous === null" significa que no aplica (p.ej. preset "Todo"); en
+     ese caso el chip se oculta en vez de mostrar un dato engañoso. */
+  renderKpiDelta(elId, current, previous) {
+    const el = document.getElementById(elId);
+    if (previous === null || previous === undefined || (current === 0 && previous === 0)) {
+      el.classList.add('hidden');
+      el.innerHTML = '';
+      return;
+    }
+
+    let text;
+    let dir;
+    if (previous === 0) {
+      text = `+${current}`;
+      dir = 'up';
+    } else {
+      const pct = Math.round(((current - previous) / previous) * 100);
+      text = `${pct > 0 ? '+' : ''}${pct}%`;
+      dir = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
+    }
+
+    const arrow = dir === 'flat'
+      ? ''
+      : '<svg class="stats-kpi-delta-arrow" viewBox="0 0 10 10" width="8" height="8" fill="currentColor" aria-hidden="true"><path d="M5 1l4 6H1z"></path></svg>';
+    el.className = `stats-kpi-delta stats-kpi-delta-${dir}`;
+    el.innerHTML = `${arrow}${escapeHtml(text)}`;
   },
 
   renderSection(id) {
@@ -225,6 +272,17 @@ function daysBetweenStats(start, end) {
 
 function formatStatsDate(iso) {
   return parseStatsISO(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/* Periodo inmediatamente anterior, de la misma duración (en días) que el
+   periodo dado, usado para calcular los indicadores de variación de los KPI. */
+function getPreviousRange(range) {
+  const spanDays = daysBetweenStats(range.start, range.end) + 1;
+  const prevEnd = parseStatsISO(range.start);
+  prevEnd.setDate(prevEnd.getDate() - 1);
+  const prevStart = new Date(prevEnd);
+  prevStart.setDate(prevStart.getDate() - (spanDays - 1));
+  return { start: toISODate(prevStart), end: toISODate(prevEnd) };
 }
 
 function aggregateByClient(appts) {
@@ -333,14 +391,19 @@ function buildTimelineBuckets(appts, start, end) {
   return buckets;
 }
 
+/* Ranking horizontal (clientes / empleados / servicios): el color es
+   siempre el mismo (job = magnitud, no identidad), salvo el cajón "Otros"
+   que va en el gris de desénfasis. Colorear cada fila con un tono distinto
+   según su posición haría que, al cambiar el filtro de fechas, el mismo
+   color pasara a representar a otra persona de una consulta a otra. */
 function renderRankingChart(containerEl, items) {
   const max = Math.max(1, ...items.map(i => i.value));
-  const rowsHtml = items.map((item, idx) => {
+  const rowsHtml = items.map((item) => {
     const pct = Math.max(4, Math.round((item.value / max) * 100));
-    const color = item.isOther ? 'var(--chart-other)' : `var(--chart-series-${(idx % 8) + 1})`;
+    const color = item.isOther ? 'var(--chart-other)' : 'var(--chart-series-1)';
     const noun = item.value === 1 ? 'cita' : 'citas';
     return `
-      <div class="hbar-row" data-tooltip="${escapeHtml(item.label)}: ${item.value} ${noun}">
+      <div class="hbar-row" tabindex="0" data-tooltip="${escapeHtml(item.label)}: ${item.value} ${noun}">
         <div class="hbar-label" title="${escapeHtml(item.label)}">${escapeHtml(item.label)}</div>
         <div class="hbar-track">
           <div class="hbar-fill" style="width:${pct}%; background:${color};"></div>
@@ -377,34 +440,131 @@ function initChartTooltip() {
   });
 }
 
+/* Redondea un máximo a un número "limpio" para las marcas del eje Y (evita
+   valores como "17" o "23" en el eje, que no ayudan a leer el gráfico). */
+function niceAxisStep(roughStep) {
+  const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+  const normalized = roughStep / magnitude;
+  let step;
+  if (normalized <= 1) step = 1;
+  else if (normalized <= 2) step = 2;
+  else if (normalized <= 5) step = 5;
+  else step = 10;
+  return step * magnitude;
+}
+
+function computeYAxisTicks(max, targetCount = 4) {
+  if (max <= targetCount) {
+    const ticks = [];
+    for (let t = 0; t <= max; t += 1) ticks.push(t);
+    return { max, ticks };
+  }
+  const step = niceAxisStep(max / targetCount);
+  const niceMax = Math.ceil(max / step) * step;
+  const ticks = [];
+  for (let t = 0; t <= niceMax; t += step) ticks.push(t);
+  return { max: niceMax, ticks };
+}
+
+/* Evolución temporal: línea + área (una sola serie => un solo tono, sin
+   leyenda), con retícula horizontal en valores redondos, cuadrícula de
+   áreas invisibles para el hover/tooltip por punto, y un punto final
+   marcado y etiquetado con su valor. */
 function renderTimelineChart(containerEl, buckets) {
-  const max = Math.max(1, ...buckets.map(b => b.value));
-  const trackHeight = 100;
-  const useFixedCols = buckets.length > 20;
-  const showEvery = Math.max(1, Math.ceil(buckets.length / 14));
-  const rowClass = useFixedCols ? 'vbar-fixed-cols' : '';
+  if (buckets.length <= 1) {
+    const only = buckets[0];
+    containerEl.innerHTML = `
+      <div class="timeline-single">
+        <span class="timeline-single-value">${only.value}</span>
+        <span class="timeline-single-label">cita${only.value === 1 ? '' : 's'} · ${escapeHtml(only.label)}</span>
+      </div>`;
+    return;
+  }
 
-  const tracksHtml = buckets.map(b => {
-    const heightPx = b.value === 0 ? 0 : Math.max(3, Math.round((b.value / max) * trackHeight));
-    const noun = b.value === 1 ? 'cita' : 'citas';
-    return `<div class="vbar-col" data-tooltip="${escapeHtml(b.label)}: ${b.value} ${noun}">
-      <div class="vbar-fill" style="height:${heightPx}px"></div>
-    </div>`;
+  const W = 920;
+  const H = 260;
+  const padLeft = 34;
+  const padRight = 16;
+  const padTop = 18;
+  const padBottom = 28;
+  const plotX0 = padLeft;
+  const plotX1 = W - padRight;
+  const plotY0 = padTop;
+  const plotY1 = H - padBottom;
+  const plotWidth = plotX1 - plotX0;
+  const plotHeight = plotY1 - plotY0;
+
+  const rawMax = Math.max(1, ...buckets.map(b => b.value));
+  const { max: axisMax, ticks } = computeYAxisTicks(rawMax);
+
+  const n = buckets.length;
+  const xAt = (i) => plotX0 + (i / (n - 1)) * plotWidth;
+  const yAt = (v) => plotY1 - (v / axisMax) * plotHeight;
+
+  const points = buckets.map((b, i) => ({ x: xAt(i), y: yAt(b.value), b }));
+
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const areaPath = `M${points[0].x.toFixed(1)},${plotY1} ` +
+    points.map(p => `L${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') +
+    ` L${points[n - 1].x.toFixed(1)},${plotY1} Z`;
+
+  const gridHtml = ticks.map(t => {
+    const y = yAt(t);
+    return `
+      <line class="tl-grid" x1="${plotX0}" x2="${plotX1}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"></line>
+      <text class="tl-axis-label" x="${plotX0 - 8}" y="${(y + 3.5).toFixed(1)}" text-anchor="end">${t}</text>`;
   }).join('');
 
-  const labelsHtml = buckets.map((b, idx) => {
-    const showLabel = idx % showEvery === 0 || idx === buckets.length - 1;
-    return `<div class="vbar-col-label">${showLabel ? escapeHtml(b.label) : ''}</div>`;
+  const showEvery = Math.max(1, Math.ceil(n / 8));
+  const xLabelsHtml = points.map((p, i) => {
+    if (!(i % showEvery === 0 || i === n - 1)) return '';
+    const anchor = i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle';
+    return `<text class="tl-axis-label" x="${p.x.toFixed(1)}" y="${H - 8}" text-anchor="${anchor}">${escapeHtml(p.b.label)}</text>`;
   }).join('');
+
+  const sliceWidth = plotWidth / n;
+  const hitsHtml = points.map((p, i) => {
+    const noun = p.b.value === 1 ? 'cita' : 'citas';
+    return `<rect class="tl-hit" x="${(plotX0 + i * sliceWidth).toFixed(1)}" y="${plotY0}" width="${sliceWidth.toFixed(1)}" height="${plotHeight}" fill="transparent" data-x="${p.x.toFixed(1)}" data-y="${p.y.toFixed(1)}" data-tooltip="${escapeHtml(p.b.label)}: ${p.b.value} ${noun}"></rect>`;
+  }).join('');
+
+  const last = points[n - 1];
 
   containerEl.innerHTML = `
-    <div class="vbar-chart">
-      <div class="vbar-axis"><span class="vbar-axis-max">${max}</span></div>
-      <div class="vbar-body">
-        <div class="vbar-tracks-row ${rowClass}" style="height:${trackHeight}px">${tracksHtml}</div>
-        <div class="vbar-labels-row ${rowClass}">${labelsHtml}</div>
-      </div>
+    <div class="timeline-chart">
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Evolución de citas en el periodo">
+        ${gridHtml}
+        <path class="tl-area" d="${areaPath}"></path>
+        <path class="tl-line" d="${linePath}"></path>
+        <circle class="tl-end-dot" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="4"></circle>
+        <text class="tl-end-label" x="${Math.min(last.x, plotX1 - 4).toFixed(1)}" y="${Math.max(last.y - 10, padTop + 2).toFixed(1)}" text-anchor="end">${last.b.value}</text>
+        ${xLabelsHtml}
+        <line class="tl-crosshair hidden" x1="0" x2="0" y1="${plotY0}" y2="${plotY1}"></line>
+        <circle class="tl-hover-dot hidden" r="5"></circle>
+        ${hitsHtml}
+      </svg>
     </div>`;
+
+  const svg = containerEl.querySelector('svg');
+  const crosshair = svg.querySelector('.tl-crosshair');
+  const hoverDot = svg.querySelector('.tl-hover-dot');
+
+  svg.querySelectorAll('.tl-hit').forEach((hit) => {
+    hit.addEventListener('pointerenter', () => {
+      const x = hit.dataset.x;
+      const y = hit.dataset.y;
+      crosshair.setAttribute('x1', x);
+      crosshair.setAttribute('x2', x);
+      crosshair.classList.remove('hidden');
+      hoverDot.setAttribute('cx', x);
+      hoverDot.setAttribute('cy', y);
+      hoverDot.classList.remove('hidden');
+    });
+  });
+  svg.addEventListener('pointerleave', () => {
+    crosshair.classList.add('hidden');
+    hoverDot.classList.add('hidden');
+  });
 }
 
 function renderStatsTable(containerEl, headers, rows) {
