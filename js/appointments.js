@@ -1,6 +1,7 @@
 /* CRUD de citas: modal de formulario, confirmación de borrado y lista del día */
 const CONFLICT_WINDOW_MINUTES = 20;
 const SLOT_INTERVAL_MINUTES = 15;
+const APPT_EXTRA_MINUTES = 30;
 
 const CLOUD_ICON_SVG = '<svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>';
 
@@ -16,6 +17,7 @@ function whatsappUrl(fullPhone) {
 
 const Appointments = {
   pendingDeleteId: null,
+  extraTimeActive: false,
 
   init() {
     this.populatePhoneCodeSelect();
@@ -45,6 +47,8 @@ const Appointments = {
       this.checkEmployeeConflict();
     });
     document.getElementById('appt-time').addEventListener('change', () => this.checkEmployeeConflict());
+
+    document.getElementById('btn-extra-time').addEventListener('click', () => this.toggleExtraTime());
 
     document.getElementById('modal-overlay').addEventListener('click', (e) => {
       if (e.target.id === 'modal-overlay') this.closeForm();
@@ -203,14 +207,39 @@ const Appointments = {
     return null;
   },
 
-  findConflict(employeeId, date, time, excludeApptId) {
+  /* El margen de conflicto se cuenta hacia delante desde la hora de inicio de
+     cada cita: si una cita (la nueva o una ya existente) tiene los 30 minutos
+     extra activados, su propio margen se amplía esos 30 minutos, para que no
+     se pueda encajar otra cita del mismo empleado justo después. */
+  findConflict(employeeId, date, time, excludeApptId, extraTime) {
     if (!employeeId || !date || !time) return null;
     const target = timeToMinutes(time);
+    const targetWindow = CONFLICT_WINDOW_MINUTES + (extraTime ? APPT_EXTRA_MINUTES : 0);
     return Store.getByDate(date).find(a => {
       if (a.employeeId !== employeeId) return false;
       if (excludeApptId && a.id === excludeApptId) return false;
-      return Math.abs(timeToMinutes(a.time) - target) < CONFLICT_WINDOW_MINUTES;
+      const existing = timeToMinutes(a.time);
+      const existingWindow = CONFLICT_WINDOW_MINUTES + (a.extraTime ? APPT_EXTRA_MINUTES : 0);
+      const diff = existing - target;
+      return diff >= 0 ? diff < targetWindow : -diff < existingWindow;
     }) || null;
+  },
+
+  toggleExtraTime() {
+    this.setExtraTimeActive(!this.extraTimeActive);
+    this.checkEmployeeConflict();
+  },
+
+  setExtraTimeActive(active) {
+    this.extraTimeActive = active;
+    const btn = document.getElementById('btn-extra-time');
+    const hint = document.getElementById('appt-extra-time-hint');
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-pressed', String(active));
+    btn.innerHTML = active
+      ? '<span class="btn-icon-inline" aria-hidden="true">&check;</span> 30 min extra añadidos'
+      : '<span class="btn-icon-inline" aria-hidden="true">+</span> 30 min extra';
+    hint.classList.toggle('hidden', !active);
   },
 
   checkEmployeeConflict() {
@@ -233,7 +262,7 @@ const Appointments = {
       return true;
     }
 
-    const conflict = this.findConflict(employeeId, date, time, excludeId);
+    const conflict = this.findConflict(employeeId, date, time, excludeId, this.extraTimeActive);
 
     if (conflict) {
       const employee = EmployeeStore.getAll().find(e => e.id === employeeId);
@@ -263,6 +292,7 @@ const Appointments = {
     document.getElementById('btn-save-appt').disabled = false;
     this.setClientHint('');
     document.getElementById('appt-employee-warning').classList.add('hidden');
+    this.setExtraTimeActive(appt ? !!appt.extraTime : false);
 
     this.populateClientsDatalist();
     this.populateEmployeeSelect();
@@ -336,7 +366,7 @@ const Appointments = {
       return;
     }
 
-    if (this.findConflict(employeeId, date, time, id)) {
+    if (this.findConflict(employeeId, date, time, id, this.extraTimeActive)) {
       this.checkEmployeeConflict();
       showToast('Ese empleado ya tiene otra cita dentro de un margen de 20 minutos. Elige otra hora u otro empleado.', 'error');
       return;
@@ -373,6 +403,7 @@ const Appointments = {
         date,
         time,
         notes,
+        extraTime: this.extraTimeActive,
       };
 
       if (id) {
@@ -463,6 +494,7 @@ const Appointments = {
           <div class="appt-phone">${escapeHtml(appt.phone)}</div>
           <div class="appt-row-bottom">
             <div class="appt-notes">${escapeHtml(appt.notes || 'Sin notas')}</div>
+            ${appt.extraTime ? '<div class="appt-extra-badge" title="Tiene 30 minutos extra">+30 min</div>' : ''}
             ${employee ? `<div class="appt-employee">${escapeHtml(employee.name)}</div>` : ''}
           </div>
         </div>

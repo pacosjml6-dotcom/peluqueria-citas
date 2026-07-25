@@ -27,6 +27,7 @@ function citaFromRow(row) {
     notes: row.notes || '',
     createdByClient: row.created_by_client || false,
     paid: row.paid || false,
+    extraTime: row.extra_time || false,
   };
 }
 
@@ -43,6 +44,7 @@ function citaToRow(data) {
     time: data.time,
     notes: data.notes || null,
     paid: data.paid || false,
+    extra_time: data.extraTime || false,
   };
 }
 

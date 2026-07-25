@@ -12,6 +12,7 @@
 const DataWipe = {
   pinConfigured: false,
   pendingAction: null,
+  pendingRange: null,
 
   init() {
     document.getElementById('btn-wipe-data').addEventListener('click', () => this.openModal());
@@ -28,7 +29,7 @@ const DataWipe = {
     document.getElementById('wipe-setup-pin-form').addEventListener('submit', (e) => this.handleSetupPin(e));
     document.getElementById('wipe-pin-gate-form').addEventListener('submit', (e) => this.handlePinGate(e));
     document.getElementById('btn-wipe-pin-gate-cancel').addEventListener('click', () => this.closeModal());
-    document.getElementById('btn-wipe-appointments').addEventListener('click', () => this.openConfirm('citas'));
+    document.getElementById('btn-wipe-appointments').addEventListener('click', () => this.startWipeAppointments());
     document.getElementById('btn-wipe-everything').addEventListener('click', () => this.openConfirm('todo'));
     document.getElementById('btn-wipe-change-pin').addEventListener('click', () => this.showChangePin());
     document.getElementById('btn-wipe-change-pin-cancel').addEventListener('click', () => this.showActions());
@@ -50,6 +51,8 @@ const DataWipe = {
     document.getElementById('wipe-setup-pin-form').reset();
     document.getElementById('wipe-pin-gate-form').reset();
     document.getElementById('wipe-change-pin-form').reset();
+    document.getElementById('wipe-appts-range-start').value = '';
+    document.getElementById('wipe-appts-range-end').value = '';
   },
 
   clearErrors() {
@@ -88,12 +91,49 @@ const DataWipe = {
     document.getElementById('wipe-change-pin-view').classList.remove('hidden');
   },
 
-  openConfirm(action) {
+  /* "Vaciar solo las citas" admite un rango de fechas opcional (elegido en
+     wipe-actions-view antes de llegar aquí): si se indica, solo se piden y
+     borran las citas de ese rango; si se deja vacío, se borran todas. */
+  startWipeAppointments() {
+    const start = document.getElementById('wipe-appts-range-start').value;
+    const end = document.getElementById('wipe-appts-range-end').value;
+
+    if ((start && !end) || (!start && end)) {
+      showToast('Selecciona las dos fechas del rango, o déjalas vacías para eliminar todas las citas.', 'error');
+      return;
+    }
+    if (start && end && start > end) {
+      showToast('La fecha "Desde" no puede ser posterior a "Hasta".', 'error');
+      return;
+    }
+
+    const range = start && end ? { start, end } : null;
+    const count = range
+      ? Store.getAll().filter((a) => a.date >= range.start && a.date <= range.end).length
+      : Store.getAll().length;
+
+    if (range && count === 0) {
+      showToast('No hay citas en ese rango de fechas.', 'error');
+      return;
+    }
+
+    this.openConfirm('citas', range, count);
+  },
+
+  openConfirm(action, range, count) {
     this.pendingAction = action;
-    document.getElementById('wipe-confirm-message').textContent = action === 'citas'
-      ? 'Vas a eliminar todas las citas. Esta acción no se puede deshacer.'
-      : 'Vas a eliminar todas las citas, clientes y empleados. Esta acción no se puede deshacer.';
-    document.getElementById('btn-wipe-confirm-submit').textContent = action === 'citas' ? 'Vaciar citas' : 'Vaciar todo';
+    this.pendingRange = range || null;
+    const messageEl = document.getElementById('wipe-confirm-message');
+    if (action === 'citas') {
+      messageEl.textContent = range
+        ? `Vas a eliminar ${count} cita${count === 1 ? '' : 's'} entre el ${formatRangeDate(range.start)} y el ${formatRangeDate(range.end)}. Esta acción no se puede deshacer.`
+        : 'Vas a eliminar todas las citas. Esta acción no se puede deshacer.';
+    } else {
+      messageEl.textContent = 'Vas a eliminar todas las citas, clientes y empleados. Esta acción no se puede deshacer.';
+    }
+    document.getElementById('btn-wipe-confirm-submit').textContent = action === 'citas'
+      ? (range ? 'Vaciar citas del rango' : 'Vaciar citas')
+      : 'Vaciar todo';
     this.hideAllViews();
     document.getElementById('wipe-confirm-view').classList.remove('hidden');
   },
@@ -224,8 +264,8 @@ const DataWipe = {
     submitBtn.disabled = true;
     try {
       if (this.pendingAction === 'citas') {
-        await this.wipeAppointmentsOnly();
-        showToast('Todas las citas se han eliminado', 'success');
+        await this.wipeAppointmentsOnly(this.pendingRange);
+        showToast(this.pendingRange ? 'Las citas del rango seleccionado se han eliminado' : 'Todas las citas se han eliminado', 'success');
       } else {
         await this.wipeEverything();
         showToast('Citas, clientes y empleados se han eliminado', 'success');
@@ -244,8 +284,16 @@ const DataWipe = {
     if (error) throw error;
   },
 
-  async wipeAppointmentsOnly() {
-    await this.deleteAllRows('citas', 'id');
+  async deleteAppointments(range) {
+    const query = supabaseClient.from('citas').delete();
+    const { error } = range
+      ? await query.gte('date', range.start).lte('date', range.end)
+      : await query.not('id', 'is', null);
+    if (error) throw error;
+  },
+
+  async wipeAppointmentsOnly(range) {
+    await this.deleteAppointments(range);
     await Store._load();
     window.dispatchEvent(new CustomEvent('citas:changed'));
   },
@@ -260,3 +308,9 @@ const DataWipe = {
     window.dispatchEvent(new CustomEvent('empleados:changed'));
   },
 };
+
+function formatRangeDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+}

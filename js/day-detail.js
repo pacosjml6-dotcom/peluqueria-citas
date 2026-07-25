@@ -75,7 +75,8 @@ const DayDetail = {
         if (start > cursor) {
           segments.push(...this.splitPast({ type: 'free', start: cursor, end: start }, isToday, nowMinutes));
         }
-        const end = Math.min(start + DAY_DETAIL_APPT_DURATION_MINUTES, rangeEnd);
+        const duration = DAY_DETAIL_APPT_DURATION_MINUTES + (appt.extraTime ? APPT_EXTRA_MINUTES : 0);
+        const end = Math.min(start + duration, rangeEnd);
         segments.push({ type: 'busy', start, end, appt });
         cursor = Math.max(cursor, end);
       });

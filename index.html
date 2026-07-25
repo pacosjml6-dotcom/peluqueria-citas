@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=45">
+  <link rel="stylesheet" href="css/styles.css?v=47">
 </head>
 <body>
   <div id="app-loading-overlay" class="app-loading-overlay">
@@ -332,6 +332,12 @@
             </select>
           </label>
         </div>
+        <div class="appt-extra-time-row">
+          <button type="button" id="btn-extra-time" class="btn btn-ghost btn-extra-time" aria-pressed="false">
+            <span class="btn-icon-inline" aria-hidden="true">+</span> 30 min extra
+          </button>
+          <p id="appt-extra-time-hint" class="field-hint hidden">Se han añadido 30 minutos extra a esta cita, por si es más extensa o necesita más tiempo.</p>
+        </div>
         <label>Servicio / Notas
           <textarea id="appt-notes" rows="2" placeholder="Ej. Corte + Tinte"></textarea>
         </label>
@@ -611,8 +617,17 @@
       <div id="wipe-actions-view" class="hidden">
         <div class="backup-section">
           <p class="backup-section-title">Vaciar solo las citas</p>
-          <p class="field-hint">Elimina todas las citas. Clientes, empleados, horario y datos de empresa no se modifican.</p>
-          <button type="button" id="btn-wipe-appointments" class="btn btn-danger backup-action-btn">Vaciar solo las citas</button>
+          <p class="field-hint">Elimina las citas. Clientes, empleados, horario y datos de empresa no se modifican.</p>
+          <div class="wipe-range-row">
+            <label>Desde
+              <input type="date" id="wipe-appts-range-start">
+            </label>
+            <label>Hasta
+              <input type="date" id="wipe-appts-range-end">
+            </label>
+          </div>
+          <p class="field-hint">Deja las dos fechas vacías para eliminar todas las citas, o elige un rango para borrar solo las de esas fechas.</p>
+          <button type="button" id="btn-wipe-appointments" class="btn btn-danger backup-action-btn">Vaciar citas</button>
         </div>
         <div class="backup-section">
           <p class="backup-section-title">Vaciar todo</p>
@@ -653,15 +668,15 @@
   <div id="toast" class="toast hidden"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/store.js?v=21"></script>
+  <script src="js/store.js?v=22"></script>
   <script src="js/countries.js?v=17"></script>
   <script src="js/calendar.js?v=17"></script>
   <script src="js/schedule.js?v=18"></script>
   <script src="js/company.js?v=1"></script>
   <script src="js/backup.js?v=1"></script>
-  <script src="js/data-wipe.js?v=2"></script>
-  <script src="js/appointments.js?v=24"></script>
-  <script src="js/day-detail.js?v=2"></script>
+  <script src="js/data-wipe.js?v=3"></script>
+  <script src="js/appointments.js?v=25"></script>
+  <script src="js/day-detail.js?v=3"></script>
   <script src="js/pending-payments.js?v=3"></script>
   <script src="js/clients.js?v=20"></script>
   <script src="js/employees.js?v=17"></script>
