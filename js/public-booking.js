@@ -10,6 +10,7 @@
    el tiempo, la solicitud queda invalidada y no se crea nada. */
 
 const CONFLICT_WINDOW_MINUTES = 20;
+const APPT_EXTRA_MINUTES = 30;
 const SLOT_INTERVAL_MINUTES = 15;
 const OTP_TTL_SECONDS = 45;
 
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 const PublicBooking = {
   occupied: [],
+  extraTimeActive: false,
   otpRequestId: null,
   otpPayload: null,
   otpTimerInterval: null,
@@ -53,10 +55,41 @@ const PublicBooking = {
       await this.loadOccupiedSlots(document.getElementById('pb-date').value);
       this.refreshTimeSlots();
     });
+    document.getElementById('pb-extra-time').addEventListener('click', () => this.toggleExtraTime());
 
     document.getElementById('pb-otp-form').addEventListener('submit', (e) => this.handleVerifyOtp(e));
     document.getElementById('pb-otp-resend').addEventListener('click', () => this.handleResendOtp());
     document.getElementById('pb-otp-back').addEventListener('click', () => this.resetForm());
+  },
+
+  toggleExtraTime() {
+    this.setExtraTimeActive(!this.extraTimeActive);
+    this.refreshTimeSlots();
+  },
+
+  setExtraTimeActive(active) {
+    this.extraTimeActive = active;
+    const btn = document.getElementById('pb-extra-time');
+    const hint = document.getElementById('pb-extra-time-hint');
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-pressed', String(active));
+    btn.innerHTML = active
+      ? '<span class="btn-icon-inline" aria-hidden="true">&check;</span> 30 min extra añadidos'
+      : '<span class="btn-icon-inline" aria-hidden="true">+</span> 30 min extra';
+    hint.classList.toggle('hidden', !active);
+  },
+
+  /* Mismo criterio que el margen de conflicto del panel de administración
+     (ver findConflict en js/appointments.js): el margen se cuenta hacia
+     delante desde la hora de inicio de cada cita, y se amplía 30 minutos si
+     esa cita (la nueva o una ya existente) tiene los 30 minutos extra. */
+  hasConflict(occupiedForEmployee, targetMinutes) {
+    const targetWindow = CONFLICT_WINDOW_MINUTES + (this.extraTimeActive ? APPT_EXTRA_MINUTES : 0);
+    return occupiedForEmployee.some(o => {
+      const existingWindow = CONFLICT_WINDOW_MINUTES + (o.extraTime ? APPT_EXTRA_MINUTES : 0);
+      const diff = o.time - targetMinutes;
+      return diff >= 0 ? diff < targetWindow : -diff < existingWindow;
+    });
   },
 
   renderCompanyInfo() {
@@ -132,14 +165,14 @@ const PublicBooking = {
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
     const occupiedForEmployee = employeeId
-      ? this.occupied.filter(o => o.employee_id === employeeId).map(o => timeToMinutes(o.time))
+      ? this.occupied.filter(o => o.employee_id === employeeId).map(o => ({ time: timeToMinutes(o.time), extraTime: !!o.extra_time }))
       : [];
 
     const slots = [];
     ranges.forEach(range => {
       for (let t = timeToMinutes(range.open); t < timeToMinutes(range.close); t += SLOT_INTERVAL_MINUTES) {
         if (isToday && t < nowMinutes) continue;
-        if (occupiedForEmployee.some(o => Math.abs(o - t) < CONFLICT_WINDOW_MINUTES)) continue;
+        if (this.hasConflict(occupiedForEmployee, t)) continue;
         slots.push(minutesToTime(t));
       }
     });
@@ -196,7 +229,10 @@ const PublicBooking = {
       // alguien lo ha ocupado mientras se rellenaba el formulario.
       await this.loadOccupiedSlots(date);
       const t = timeToMinutes(time);
-      const stillFree = !this.occupied.some(o => o.employee_id === employeeId && Math.abs(timeToMinutes(o.time) - t) < CONFLICT_WINDOW_MINUTES);
+      const occupiedForEmployee = this.occupied
+        .filter(o => o.employee_id === employeeId)
+        .map(o => ({ time: timeToMinutes(o.time), extraTime: !!o.extra_time }));
+      const stillFree = !this.hasConflict(occupiedForEmployee, t);
       if (!stillFree) {
         this.refreshTimeSlots();
         showPbToast('Ese hueco se acaba de ocupar. Elige otra hora.', 'error');
@@ -206,7 +242,7 @@ const PublicBooking = {
       const fullPhone = `+${dialCode}${phoneDigits}`;
       const payload = {
         name, phone: fullPhone, dial_code: dialCode, phone_local: phoneLocalRaw, email,
-        employee_id: employeeId, date, time, notes,
+        employee_id: employeeId, date, time, notes, extra_time: this.extraTimeActive,
       };
 
       const { data, error } = await supabaseClient.functions.invoke('send-booking-otp', { body: { payload } });
@@ -361,6 +397,7 @@ const PublicBooking = {
     document.getElementById('pb-date').min = toISODate(new Date());
     document.getElementById('pb-time').innerHTML = '<option value="">Selecciona primero una fecha</option>';
     document.getElementById('pb-warning').classList.add('hidden');
+    this.setExtraTimeActive(false);
     this.occupied = [];
 
     document.getElementById('booking-otp').classList.add('hidden');

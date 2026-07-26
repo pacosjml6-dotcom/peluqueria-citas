@@ -77,6 +77,12 @@
           </label>
         </div>
         <p id="pb-warning" class="field-warning hidden"></p>
+        <div class="appt-extra-time-row">
+          <button type="button" id="pb-extra-time" class="btn btn-ghost btn-extra-time" aria-pressed="false">
+            <span class="btn-icon-inline" aria-hidden="true">+</span> 30 min extra
+          </button>
+          <p id="pb-extra-time-hint" class="field-hint hidden">Se añadirán 30 minutos extra a tu cita, por si el servicio es más largo o necesita más tiempo.</p>
+        </div>
         <label>Servicio / Notas
           <textarea id="pb-notes" rows="2" placeholder="Ej. Corte + Tinte"></textarea>
         </label>
@@ -150,6 +156,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/store.js?v=25"></script>
   <script src="js/countries.js?v=21"></script>
-  <script src="js/public-booking.js?v=24"></script>
+  <script src="js/public-booking.js?v=25"></script>
 </body>
 </html>

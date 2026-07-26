@@ -1,14 +1,22 @@
 // Genera un código de 6 dígitos, lo guarda (solo su hash) junto a los datos
-// de la cita pendiente, y se lo envía al cliente por correo con Resend.
+// de la cita pendiente, y se lo envía al cliente por correo con Brevo.
 // Se invoca desde reservar.html (js/public-booking.js) antes de crear la
 // cita: la cita solo llega a crearse si el cliente introduce el código a
 // tiempo, mediante verify_appointment_otp() (ver supabase/booking-otp.sql).
+//
+// Usa Brevo (antes Sendinblue) en vez de Resend porque Brevo permite enviar
+// a cualquier destinatario verificando solo la dirección remitente (un clic
+// en un correo de confirmación), sin necesitar un dominio propio verificado
+// por DNS. Ver supabase/functions/send-booking-otp/README.md para la
+// configuración paso a paso.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
+const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY')!;
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const EMAIL_FROM = Deno.env.get('BOOKING_OTP_FROM') || 'Confirmación de cita <onboarding@resend.dev>';
+// Debe ser exactamente la dirección que verificaste como "remitente" en Brevo.
+const EMAIL_FROM_ADDRESS = Deno.env.get('BOOKING_OTP_FROM_EMAIL')!;
+const EMAIL_FROM_NAME = Deno.env.get('BOOKING_OTP_FROM_NAME') || 'Confirmación de cita';
 
 const OTP_TTL_SECONDS = 45;
 const REQUIRED_FIELDS = ['name', 'phone', 'dial_code', 'phone_local', 'email', 'employee_id', 'date', 'time'];
@@ -100,14 +108,14 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'server_error' }, 500);
   }
 
-  const emailRes = await fetch('https://api.resend.com/emails', {
+  const emailRes = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({
-      from: EMAIL_FROM,
-      to: email,
+      sender: { name: EMAIL_FROM_NAME, email: EMAIL_FROM_ADDRESS },
+      to: [{ email, name: String(payload.name) }],
       subject: 'Tu código para confirmar la cita',
-      html: `${companyLine}
+      htmlContent: `${companyLine}
         <p>Hola ${escapeHtml(String(payload.name))},</p>
         <p>Tu código para confirmar la cita es:</p>
         <p style="font-size:28px;font-weight:700;letter-spacing:4px;">${code}</p>
@@ -116,7 +124,7 @@ Deno.serve(async (req) => {
   });
 
   if (!emailRes.ok) {
-    console.error('Resend respondió con error', await emailRes.text());
+    console.error('Brevo respondió con error', await emailRes.text());
     await admin.from('reserva_otp').delete().eq('id', row.id);
     return jsonResponse({ ok: false, error: 'email_failed' }, 502);
   }
