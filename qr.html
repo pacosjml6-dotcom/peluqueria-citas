@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=34">
+  <link rel="stylesheet" href="css/styles.css?v=50">
 </head>
 <body class="public-booking-body">
   <main class="qr-page">
@@ -32,7 +32,7 @@
       await QRCode.toCanvas(canvas, targetUrl, {
         width: 360,
         margin: 1,
-        color: { dark: '#0f172a', light: '#ffffff' }
+        color: { dark: '#16161a', light: '#ffffff' }
       });
     } catch (error) {
       document.getElementById('qr-canvas-wrap').textContent = 'No se pudo generar el código QR.';
