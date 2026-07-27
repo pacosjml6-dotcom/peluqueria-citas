@@ -317,13 +317,14 @@ const ScheduleStore = {
 
 /* Datos de la empresa (nombre, teléfono, dirección): fila única en la tabla
    "empresa", editable desde el botón "Datos de empresa". */
-const DEFAULT_COMPANY = { name: '', phone: '', address: '' };
+const DEFAULT_COMPANY = { name: '', phone: '', address: '', servicesInfo: '' };
 
 function companyFromRow(row) {
   return {
     name: row.name || '',
     phone: row.phone || '',
     address: row.address || '',
+    servicesInfo: row.services_info || '',
   };
 }
 
@@ -348,7 +349,13 @@ const CompanyStore = {
   },
 
   async save(company) {
-    const row = { id: true, name: company.name || '', phone: company.phone || '', address: company.address || '' };
+    const row = {
+      id: true,
+      name: company.name || '',
+      phone: company.phone || '',
+      address: company.address || '',
+      services_info: company.servicesInfo || '',
+    };
     const { error } = await supabaseClient.from('empresa').upsert(row, { onConflict: 'id' });
     if (error) throw error;
     this.cache = companyFromRow(row);

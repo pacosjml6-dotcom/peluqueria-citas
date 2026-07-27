@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     Backup.init();
     DataWipe.init();
     Statistics.init();
+    ChatAssistant.init();
 
     DataStore.subscribeRealtime();
 

@@ -24,6 +24,7 @@ const Company = {
     document.getElementById('company-name').value = company.name;
     document.getElementById('company-phone').value = company.phone;
     document.getElementById('company-address').value = company.address;
+    document.getElementById('company-services-info').value = company.servicesInfo || '';
   },
 
   openForm() {
@@ -41,12 +42,13 @@ const Company = {
     const name = document.getElementById('company-name').value.trim();
     const phone = document.getElementById('company-phone').value.trim();
     const address = document.getElementById('company-address').value.trim();
+    const servicesInfo = document.getElementById('company-services-info').value.trim();
 
     const submitBtn = e.submitter || e.target.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
 
     try {
-      await CompanyStore.save({ name, phone, address });
+      await CompanyStore.save({ name, phone, address, servicesInfo });
       this.renderHeader();
       this.closeForm();
       showToast('Datos de empresa actualizados correctamente', 'success');

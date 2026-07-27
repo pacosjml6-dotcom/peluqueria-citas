@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loading.classList.add('hidden');
   page.classList.remove('hidden');
   PublicBooking.init();
+  ChatAssistant.init();
 });
 
 const PublicBooking = {
