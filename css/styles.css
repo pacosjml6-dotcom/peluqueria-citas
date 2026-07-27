@@ -596,13 +596,13 @@ button {
 }
 
 .calendar-day.is-today .day-number {
-  color: var(--color-text);
+  color: var(--color-success);
   font-weight: 800;
 }
 
 .calendar-day.is-today {
-  background: var(--color-surface);
-  border-color: var(--color-primary);
+  background: var(--color-success-light);
+  border-color: var(--color-success);
   border-width: 1.5px;
 }
 
@@ -611,12 +611,12 @@ button {
 }
 
 .calendar-day.is-past:not(.is-outside) {
-  background: var(--color-surface-alt);
+  background: var(--color-surface-hover);
   border-color: var(--color-border);
 }
 
 .calendar-day.is-future .day-number {
-  color: var(--color-text);
+  color: var(--color-info);
 }
 
 .calendar-day.is-future:not(.is-outside) {
