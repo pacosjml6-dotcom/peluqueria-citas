@@ -371,6 +371,13 @@ async function executeTool(name: string, input: Record<string, unknown>, mode: '
 /* ---------------------------------------------------------------- */
 /* System prompt: contexto del negocio + reglas de oro + seguridad. */
 
+function addDaysToDateStr(dateStr: string, days: number): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  date.setDate(date.getDate() + days);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 async function buildSystemPrompt(mode: 'staff' | 'public'): Promise<string> {
   const [{ data: company }, { data: horario }] = await Promise.all([
     admin.from('empresa').select('name, phone, address').eq('id', true).maybeSingle(),
@@ -387,6 +394,19 @@ async function buildSystemPrompt(mode: 'staff' | 'public'): Promise<string> {
     return `${name}: ${parts.join(' y ') || 'cerrado'}`;
   }).join('\n');
 
+  // Tabla de los próximos 14 días con su día de la semana, para que el
+  // modelo NUNCA tenga que calcular él mismo a qué fecha corresponde "mañana",
+  // "el viernes" o "la semana que viene" (los LLM fallan calculando días de
+  // la semana de memoria). Con esta tabla solo tiene que mirar y traducir.
+  const today = todayMadridStr();
+  const labels = ['hoy', 'mañana'];
+  const dateTableLines = Array.from({ length: 14 }, (_, i) => {
+    const dateStr = addDaysToDateStr(today, i);
+    const weekday = dayNames[dayIndexForDate(dateStr)];
+    const label = labels[i] ? ` (${labels[i]})` : '';
+    return `${dateStr} = ${weekday}${label}`;
+  }).join('\n');
+
   const companyLines = [
     company?.name ? `Nombre del salón: ${company.name}` : null,
     company?.phone ? `Teléfono: ${company.phone}` : null,
@@ -398,6 +418,11 @@ async function buildSystemPrompt(mode: 'staff' | 'public'): Promise<string> {
     : `Hablas con un cliente potencial o existente, sin que haya iniciado sesión (widget público). NUNCA reveles, confirmes ni sugieras datos de citas o clientes salvo que la propia herramienta get_user_appointments los devuelva tras verificar el teléfono y correo que el cliente te ha dado voluntariamente. No pidas ni aceptes datos de "otra persona".`;
 
   return `Eres el asistente virtual de ${company?.name || 'un salón de peluquería/estética'}. Responde siempre en español, con un tono amable, cercano, profesional y CONCISO (evita respuestas largas; ve al grano).
+
+FECHA DE HOY: ${today} (${dayNames[dayIndexForDate(today)]})
+
+PRÓXIMOS 14 DÍAS (fecha AAAA-MM-DD = día de la semana)
+${dateTableLines}
 
 DATOS DEL NEGOCIO
 ${companyLines || '(el salón no ha configurado nombre/teléfono/dirección todavía)'}
@@ -413,6 +438,11 @@ CONOCIMIENTO QUE PUEDES OFRECER
 - Información sobre los profesionales: usa get_staff_list.
 - Huecos disponibles para reservar: usa SIEMPRE get_available_slots con la fecha (y profesional si lo han indicado). No calcules ni supongas disponibilidad tú mismo.
 - Citas del propio cliente/personal: usa get_user_appointments según corresponda.
+
+CÓMO INTERPRETAR FECHAS QUE DIGA EL CLIENTE
+Cuando el cliente mencione un día en lenguaje natural (hoy, mañana, pasado mañana, el viernes, el próximo lunes, la semana que viene, el 15, etc.), tradúcelo tú mismo a una fecha exacta AAAA-MM-DD usando la tabla de arriba — nunca calcules el día de la semana de memoria, mira la tabla. Si dice un día de la semana sin más ("el viernes"), usa el más próximo que aparezca en la tabla. Si la fecha que necesitas queda fuera de esos 14 días (p. ej. "el mes que viene"), aun así pasa la fecha AAAA-MM-DD que corresponda a get_available_slots; la tabla es solo una ayuda de referencia para los próximos días, no un límite.
+Si el cliente no da ninguna pista de fecha ("¿tenéis hueco?"), pregúntale qué día le viene bien antes de consultar disponibilidad — no elijas una fecha al azar.
+Una vez sepas la fecha (y, si lo ha dicho, el profesional), llama a get_available_slots y ofrece 3-5 horas libres como máximo en la respuesta, no la lista completa; puedes ofrecer más si el cliente lo pide.
 
 REGLA DE ORO
 NUNCA inventes disponibilidad ni confirmes una cita por tu cuenta: tú no creas, modificas ni cancelas citas. Cuando el cliente quiera reservar un hueco concreto que ya has confirmado como libre, indícale que complete la reserva en el formulario de esta misma página (o, si hablas con personal del salón, que use el botón "Nueva cita" del panel). No digas frases como "he reservado tu cita" ni nada equivalente.
