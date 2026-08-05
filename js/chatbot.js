@@ -85,7 +85,7 @@ const ChatAssistant = {
     const container = document.getElementById('chatbot-messages');
     container.innerHTML = '';
     if (this.history.length === 0) {
-      this.appendBubble('assistant', '¡Hola! Puedo ayudarte con horarios, servicios, disponibilidad de citas y consultar tus próximas citas. ¿En qué puedo ayudarte?');
+      this.appendBubble('assistant', '¡Hola! Puedo ayudarte con horarios, servicios, disponibilidad, reservar una cita y consultar tus próximas citas. ¿En qué puedo ayudarte?');
       return;
     }
     this.history.forEach((m) => this.appendBubble(m.role, m.content));

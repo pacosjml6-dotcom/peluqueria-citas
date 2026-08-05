@@ -18,7 +18,8 @@ const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const EMAIL_FROM_ADDRESS = Deno.env.get('BOOKING_OTP_FROM_EMAIL')!;
 const EMAIL_FROM_NAME = Deno.env.get('BOOKING_OTP_FROM_NAME') || 'Confirmación de cita';
 
-const OTP_TTL_SECONDS = 45;
+const DEFAULT_OTP_TTL_SECONDS = 45;
+const MAX_OTP_TTL_SECONDS = 300;
 const REQUIRED_FIELDS = ['name', 'phone', 'dial_code', 'phone_local', 'email', 'employee_id', 'date', 'time'];
 
 const corsHeaders = {
@@ -47,10 +48,16 @@ function escapeHtml(str: string): string {
   return str.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[c]);
 }
 
+function formatTtl(seconds: number): string {
+  if (seconds < 60) return `${seconds} segundos`;
+  const minutes = Math.round(seconds / 60);
+  return minutes === 1 ? '1 minuto' : `${minutes} minutos`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
-  let body: { payload?: Record<string, unknown> };
+  let body: { payload?: Record<string, unknown>; ttlSeconds?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -61,6 +68,9 @@ Deno.serve(async (req) => {
   if (!payload || typeof payload !== 'object') {
     return jsonResponse({ ok: false, error: 'invalid_payload' }, 400);
   }
+  const ttlSeconds = typeof body.ttlSeconds === 'number' && body.ttlSeconds > 0
+    ? Math.min(Math.floor(body.ttlSeconds), MAX_OTP_TTL_SECONDS)
+    : DEFAULT_OTP_TTL_SECONDS;
   for (const field of REQUIRED_FIELDS) {
     if (!payload[field]) return jsonResponse({ ok: false, error: 'missing_field', field }, 400);
   }
@@ -95,7 +105,7 @@ Deno.serve(async (req) => {
 
   const code = randomCode();
   const codeHash = await sha256Hex(code);
-  const expiresAt = new Date(Date.now() + OTP_TTL_SECONDS * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + ttlSeconds * 1000).toISOString();
 
   const { data: row, error: insertError } = await admin
     .from('reserva_otp')
@@ -119,7 +129,7 @@ Deno.serve(async (req) => {
         <p>Hola ${escapeHtml(String(payload.name))},</p>
         <p>Tu código para confirmar la cita es:</p>
         <p style="font-size:28px;font-weight:700;letter-spacing:4px;">${code}</p>
-        <p>Caduca en ${OTP_TTL_SECONDS} segundos. Si no has pedido esta cita, ignora este correo.</p>`,
+        <p>Caduca en ${formatTtl(ttlSeconds)}. Si no has pedido esta cita, ignora este correo.</p>`,
     }),
   });
 
@@ -129,5 +139,5 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'email_failed' }, 502);
   }
 
-  return jsonResponse({ ok: true, requestId: row.id, expiresInSeconds: OTP_TTL_SECONDS });
+  return jsonResponse({ ok: true, requestId: row.id, expiresInSeconds: ttlSeconds });
 });

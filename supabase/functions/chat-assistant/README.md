@@ -1,19 +1,30 @@
-# Configurar el asistente de chat con IA (Anthropic Claude)
+# Configurar el asistente de chat con IA (Google Gemini)
 
-Este asistente responde dudas frecuentes y consulta disponibilidad real
-(nunca inventada) tanto desde el panel interno (`index.html`, personal ya
-autenticado) como desde la página pública de autorreserva (`reservar.html`,
-sin login). Es de solo lectura: no crea, modifica ni cancela citas; siempre
-redirige al flujo de reserva/edición que ya existe en la app.
+Este asistente responde dudas frecuentes, consulta disponibilidad real
+(nunca inventada) y puede crear citas nuevas, tanto desde el panel interno
+(`index.html`, personal ya autenticado) como desde la página pública de
+autorreserva (`reservar.html`, sin login):
 
-## 1. Clave de API de Anthropic
+- **Modo staff**: crea la cita directamente con la herramienta
+  `create_appointment`, sin pasos adicionales (el personal ya está
+  autenticado).
+- **Modo público**: solo puede crear una cita pasando por el mismo código de
+  verificación por correo que ya usa el formulario normal de autorreserva
+  (`request_appointment_otp` envía el código reutilizando internamente la
+  Edge Function `send-booking-otp`; `confirm_appointment_otp` lo valida y
+  crea la cita).
 
-Crea una clave en https://console.anthropic.com (Settings → API Keys).
+El asistente nunca modifica ni cancela una cita ya existente: para eso
+siempre redirige al flujo de edición/cancelación que ya existe en la app.
+
+## 1. Clave de API de Gemini
+
+Crea una clave en https://aistudio.google.com/apikey (Google AI Studio).
 
 ## 2. Configurar los secretos en Supabase
 
 ```
-supabase secrets set ANTHROPIC_API_KEY=sk-ant-xxxxxxxx
+supabase secrets set GEMINI_API_KEY=xxxxxxxx
 ```
 
 `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` ya están disponibles
@@ -45,24 +56,48 @@ servicios" con los servicios, duraciones y precios orientativos que quieras
 que el asistente pueda ofrecer — si lo dejas vacío, el asistente avisará al
 cliente de que consulte los precios llamando al salón.
 
-## 5. Probar
+## 5. Desplegar también `send-booking-otp` (si no estaba ya)
+
+`request_appointment_otp` invoca internamente a la Edge Function
+`send-booking-otp` (con la `service role key`, sin necesitar secretos
+adicionales en `chat-assistant`). Asegúrate de que también está desplegada
+sin verificación de JWT y con sus propios secretos configurados (ver
+`supabase/functions/send-booking-otp/README.md`):
+
+```
+supabase functions deploy send-booking-otp --no-verify-jwt
+```
+
+## 6. Probar
 
 - Desde `index.html` (con sesión iniciada): el asistente puede buscar citas
-  de cualquier cliente por nombre, teléfono o correo.
+  de cualquier cliente por nombre, teléfono o correo, y crear una cita nueva
+  directamente pidiéndoselo por chat.
 - Desde `reservar.html` (sin sesión): el asistente solo puede mostrar las
   citas futuras de quien facilite, en el propio chat, el mismo teléfono Y
-  correo con los que reservó.
+  correo con los que reservó, y puede crear una cita nueva pidiendo primero
+  un código de verificación por correo.
 
 ## Notas de seguridad
 
-- La clave de Anthropic nunca se envía al navegador: todas las llamadas al
+- La clave de Gemini nunca se envía al navegador: todas las llamadas al
   modelo y a Supabase ocurren dentro de esta función, con la `service role`.
 - El modo "público" solo puede leer datos ya expuestos por el resto de la
   app (empleados, horario, huecos libres) o las citas del propio cliente,
   verificado por teléfono + correo exactos.
-- Si en el futuro se quiere reforzar la verificación en el modo público
-  (por ejemplo, exigiendo un código OTP como en la reserva), se puede
-  reutilizar el mecanismo de `supabase/booking-otp.sql`.
+- La creación de citas en modo público exige el mismo código de verificación
+  por correo que el formulario normal de autorreserva (`reserva_otp`,
+  `supabase/booking-otp.sql`) — el chat nunca puede crear una cita pública
+  sin ese paso.
 - Cada petición limita el número de vueltas del bucle de herramientas
   (`MAX_TOOL_ITERATIONS`) y el tamaño del historial de conversación enviado
   al modelo, para acotar el coste y la latencia por mensaje.
+
+## Cambiar de modelo
+
+El modelo se fija en la constante `MODEL` de `index.ts` (por defecto
+`gemini-3.5-flash`). Se puede cambiar a otro modelo de Gemini que soporte
+function calling sin tocar el resto del código; comprueba primero qué
+modelos están disponibles para tu clave en
+https://generativelanguage.googleapis.com/v1beta/models?key=TU_CLAVE,
+ya que Google retira periódicamente versiones antiguas para claves nuevas.
