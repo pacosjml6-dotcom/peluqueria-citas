@@ -365,6 +365,17 @@ button {
     grid-template-columns: 1fr;
     overflow-y: auto;
   }
+
+  /* La burbuja del chat (ver "Widget de chat" más abajo) queda fija sobre
+     la esquina inferior derecha. Sin este hueco, la última fila de la
+     lista quedaría siempre parcialmente tapada por la burbuja al hacer
+     scroll; con él, siempre se puede desplazar hasta dejarla del todo
+     libre por encima. */
+  .appointments-list,
+  .clients-list {
+    padding-bottom: 84px;
+    scroll-padding-bottom: 84px;
+  }
 }
 
 .card {
@@ -702,6 +713,7 @@ button {
   min-height: 0;
   overflow-y: auto;
   padding-right: 2px;
+  scroll-padding-bottom: 12px;
 }
 
 .empty-state {
@@ -2555,10 +2567,30 @@ body.public-booking-body {
 .chatbot-send:disabled { opacity: 0.5; cursor: default; transform: none; }
 
 @media (max-width: 480px) {
-  #chatbot-root { right: 12px; bottom: 12px; }
+  #chatbot-root { right: 10px; bottom: 10px; }
+
+  /* Burbuja algo más pequeña: en un móvil ocupa proporcionalmente más
+     espacio útil que en escritorio. */
+  .chatbot-bubble { width: 48px; height: 48px; }
+
+  /* En vez de una cajita anclada a la burbuja (que en pantallas pequeñas
+     dejaba huecos arriba y abajo por los que se veía el resto de la
+     página, incluida la propia burbuja, detrás del panel), el chat pasa a
+     ser una superposición centrada que ocupa prácticamente toda la
+     pantalla: más clara de leer y sin nada compitiendo visualmente con
+     ella mientras está abierta. */
   .chatbot-panel {
-    width: calc(100vw - 24px);
-    height: calc(100vh - 100px);
-    bottom: 68px;
+    position: fixed;
+    inset: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) 10px;
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: none;
+  }
+
+  /* La burbuja ya no hace falta mientras el panel está abierto (para
+     cerrar está el botón de la cabecera): así no asoma detrás del panel. */
+  #chatbot-root:has(.chatbot-panel:not(.hidden)) .chatbot-bubble {
+    visibility: hidden;
   }
 }
