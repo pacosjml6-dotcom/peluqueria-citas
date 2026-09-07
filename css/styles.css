@@ -2197,19 +2197,10 @@ button {
   text-decoration: underline;
 }
 
-.trends-disclaimer {
-  margin: 0;
+.trends-generated-note {
+  margin: 10px 0 0;
   font-size: 11.5px;
   color: var(--color-text-muted);
-  text-align: center;
-  padding-bottom: 4px;
-}
-
-.trends-disclaimer code {
-  font-family: monospace;
-  background: var(--color-surface-alt);
-  padding: 1px 5px;
-  border-radius: 4px;
 }
 
 /* Gráfico de barras horizontales (ranking): un único tono de acento para

@@ -108,6 +108,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('empresa:changed', () => {
       Company.renderHeader();
     });
+    window.addEventListener('tendencias:changed', () => {
+      if (!document.getElementById('view-trends').classList.contains('hidden')) Trends.render();
+    });
 
     document.getElementById('btn-today').addEventListener('click', () => {
       Calendar.goToToday();

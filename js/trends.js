@@ -1,6 +1,10 @@
-/* Tendencias: contenido editorial estático (no depende de las citas) con
-   inspiración de moda capilar para enseñar a los clientes. Se actualiza a
-   mano editando TRENDS_DATA cuando cambien las tendencias de temporada.
+/* Tendencias: el marco visual de cada categoría (icono, color, y el enlace
+   de "Ver inspiración" de cada estilo) es fijo aquí, porque no depende de la
+   moda. El contenido en sí (subtítulo + estilos concretos de cada
+   categoría) SÍ cambia con la moda: se genera con IA y se guarda en la
+   tabla "tendencias" (ver supabase/trends-content.sql y la Edge Function
+   "generate-trends"), en vez de quedarse fijo aquí. TrendsContentStore
+   (js/store.js) es quien lo carga y lo mantiene al día en tiempo real.
 
    No se usan fotografías reales (no hay forma fiable de enlazar imágenes
    de terceros con derechos claros y sin riesgo de que el enlace se rompa),
@@ -16,11 +20,10 @@ function imageSearch(query) {
   return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`;
 }
 
-const TRENDS_DATA = [
+const TREND_CATEGORIES = [
   {
     id: 'cortes',
     title: 'Cortes femeninos',
-    subtitle: 'Los cortes de mujer que más se piden esta temporada',
     color: 'var(--chart-series-1)',
     bg: 'rgba(42, 120, 214, 0.12)',
     // Tijera abriéndose sobre un mechón que cae, sugiriendo el corte.
@@ -33,17 +36,10 @@ const TRENDS_DATA = [
       <line x1="14.8" y1="14.7" x2="20" y2="20"></line>
       <line x1="8.7" y1="8.7" x2="12.2" y2="12.2"></line>
     `,
-    items: [
-      { title: 'Bob italiano', desc: 'Por encima del hombro, líneas limpias y muy favorecedor. El corte femenino más pedido en salón.', link: imageSearch('bob italiano corte de pelo') },
-      { title: 'Shag texturizado', desc: 'Capas suaves y desfiladas que aportan movimiento; ideal para dar cuerpo al cabello fino.', link: imageSearch('shag texturizado corte de pelo') },
-      { title: 'Flequillo cortina', desc: 'Sigue siendo tendencia, sobre todo combinado con melenas midi o long bob.', link: imageSearch('flequillo cortina melena midi') },
-      { title: 'Mullet moderno', desc: 'Versión suavizada del clásico, con capas que dan volumen sin resultar agresivo.', link: imageSearch('mullet moderno corte de pelo') },
-    ],
   },
   {
     id: 'cortes-masculinos',
     title: 'Cortes masculinos',
-    subtitle: 'Los cortes de hombre que más se piden esta temporada',
     color: 'var(--chart-series-4)',
     bg: 'rgba(237, 161, 0, 0.12)',
     // Peine con púas, representando el arreglo y peinado masculino.
@@ -55,17 +51,10 @@ const TRENDS_DATA = [
       <line x1="15.2" y1="8" x2="15.2" y2="16"></line>
       <line x1="18.6" y1="8" x2="18.6" y2="12.5"></line>
     `,
-    items: [
-      { title: 'Crop francés texturizado', desc: 'Flequillo corto y texturizado arriba combinado con fade en los laterales.', link: imageSearch('corte crop francés texturizado hombre') },
-      { title: 'Buzz cut', desc: 'Rapado uniforme muy corto, de bajo mantenimiento y muy versátil.', link: imageSearch('buzz cut corte de pelo hombre') },
-      { title: 'Low fade con raya definida', desc: 'Degradado bajo y sutil rematado con una raya marcada a un lado.', link: imageSearch('low fade raya definida corte hombre') },
-      { title: 'Undercut peinado hacia atrás', desc: 'Laterales muy cortos y parte superior larga peinada hacia atrás, estilo slick back.', link: imageSearch('undercut slick back corte hombre') },
-    ],
   },
   {
     id: 'tintes',
     title: 'Tintes y color',
-    subtitle: 'Técnicas y tonos que están arrasando',
     color: 'var(--chart-series-2)',
     bg: 'rgba(235, 104, 52, 0.12)',
     // Tres mechones goteando color, en tonos cobre / miel / rubio.
@@ -77,17 +66,10 @@ const TRENDS_DATA = [
       <path d="M18 2c-2 4 2 8 0 12" fill="none"></path>
       <circle cx="17.3" cy="15.5" r="1.7" fill="#f2d49b" stroke="none"></circle>
     `,
-    items: [
-      { title: 'Balayage en tonos beige', desc: 'Frío y arena claro, para un resultado limpio, moderno y de bajo mantenimiento.', link: imageSearch('balayage tonos beige') },
-      { title: 'Rubios grises nórdicos', desc: 'Reflejo perlado grisáceo conseguido con balayage o babylights.', link: imageSearch('rubio gris nórdico balayage') },
-      { title: 'Castaños iluminados', desc: 'Base oscura con reflejos cálidos casi imperceptibles que aportan profundidad.', link: imageSearch('castaño iluminado reflejos') },
-      { title: 'Cobrizos editoriales', desc: 'Tonos cobre ricos y dimensionados, entre cálido y profundo, con acabado muy cuidado.', link: imageSearch('tinte cobrizo editorial') },
-    ],
   },
   {
     id: 'peinados',
     title: 'Peinados',
-    subtitle: 'Cómo se lleva el pelo puesto esta temporada',
     color: 'var(--chart-series-7)',
     bg: 'rgba(74, 58, 167, 0.12)',
     // Ondas apiladas sugiriendo movimiento y textura natural.
@@ -96,16 +78,10 @@ const TRENDS_DATA = [
       <path d="M2 12c4-3 6 3 10 0s6-3 10 0" fill="none"></path>
       <path d="M2 18c4-3 6 3 10 0s6-3 10 0" fill="none"></path>
     `,
-    items: [
-      { title: 'Ondas naturales', desc: 'Movimiento relajado, volumen en la raíz y mechones sueltos, sin looks demasiado pulidos.', link: imageSearch('ondas naturales peinado') },
-      { title: 'Revival años 70', desc: 'Capas abundantes, ondas al aire y volumen texturizado a lo largo de toda la melena.', link: imageSearch('peinado revival años 70') },
-      { title: 'Recogidos desenfadados', desc: 'Menos estructura, más naturalidad: el peinado "con vida" gana terreno a lo perfecto.', link: imageSearch('recogido desenfadado peinado') },
-    ],
   },
   {
     id: 'barbas',
     title: 'Barbas',
-    subtitle: 'Los estilos de barba con más demanda',
     color: 'var(--chart-series-3)',
     bg: 'rgba(27, 175, 122, 0.12)',
     // Silueta de mandíbula con barba y una línea de bigote.
@@ -114,43 +90,95 @@ const TRENDS_DATA = [
       <path d="M5 9c-1.2 3-1 6.2 1.2 8.4 2 2 3.8 2.8 5.8 2.8s3.8-.8 5.8-2.8C20 15.2 20.2 12 19 9"></path>
       <path d="M8.7 14.2c1 1 2.1 1.5 3.3 1.5s2.3-.5 3.3-1.5"></path>
     `,
-    items: [
-      { title: 'Barba corta degradada', desc: 'Densidad uniforme con fade en los laterales; el estilo más pedido en barbería.', link: imageSearch('barba corta degradada fade') },
-      { title: 'Barba candado', desc: 'Perilla y bigote conectados por una línea fina, dejando las mejillas rasuradas.', link: imageSearch('barba candado estilo') },
-      { title: 'Barba desconectada', desc: 'Bigote y barba trabajados como piezas independientes, con un hueco marcado entre ambos.', link: imageSearch('barba desconectada bigote') },
-      { title: 'Barba tipo boxeada', desc: 'Contorno muy definido y recto, manteniendo el volumen natural del pelo por dentro.', link: imageSearch('barba boxeada estilo') },
-    ],
   },
 ];
 
 const Trends = {
+  refreshing: false,
+
   init() {
     this.render();
+    const btn = document.getElementById('btn-refresh-trends');
+    if (btn) btn.addEventListener('click', () => this.refresh());
   },
 
   render() {
     const container = document.getElementById('trends-sections');
-    container.innerHTML = TRENDS_DATA.map(section => `
+    const contentById = new Map(TrendsContentStore.getSections().map(s => [s.id, s]));
+
+    this.renderGeneratedNote();
+
+    container.innerHTML = TREND_CATEGORIES.map(category => {
+      const content = contentById.get(category.id);
+      const subtitle = content?.subtitle || '';
+      const items = content?.items || [];
+
+      return `
       <section class="stats-chart-card card trends-section">
         <div class="stats-chart-header trends-section-header">
-          <span class="trends-hero-badge" style="background:${section.bg}; color:${section.color}" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${section.heroIcon}</svg>
+          <span class="trends-hero-badge" style="background:${category.bg}; color:${category.color}" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${category.heroIcon}</svg>
           </span>
           <div>
-            <h3>${escapeHtml(section.title)}</h3>
-            <p class="stats-chart-subtitle">${escapeHtml(section.subtitle)}</p>
+            <h3>${escapeHtml(category.title)}</h3>
+            <p class="stats-chart-subtitle">${escapeHtml(subtitle)}</p>
           </div>
         </div>
-        <div class="trends-grid">
-          ${section.items.map(item => `
-            <div class="trend-card" style="border-left-color:${section.color}">
-              <div class="trend-card-title">${escapeHtml(item.title)}</div>
-              <div class="trend-card-desc">${escapeHtml(item.desc)}</div>
-              ${item.link ? `<a class="trend-card-link" href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer" style="color:${section.color}">Ver inspiración →</a>` : ''}
-            </div>
-          `).join('')}
-        </div>
+        ${items.length === 0
+          ? '<div class="empty-state"><p>Todavía no hay contenido generado para esta categoría.</p></div>'
+          : `<div class="trends-grid">
+              ${items.map(item => `
+                <div class="trend-card" style="border-left-color:${category.color}">
+                  <div class="trend-card-title">${escapeHtml(item.title)}</div>
+                  <div class="trend-card-desc">${escapeHtml(item.desc)}</div>
+                  <a class="trend-card-link" href="${escapeHtml(imageSearch(item.title))}" target="_blank" rel="noopener noreferrer" style="color:${category.color}">Ver inspiración →</a>
+                </div>
+              `).join('')}
+            </div>`}
       </section>
-    `).join('');
+    `;
+    }).join('');
+  },
+
+  renderGeneratedNote() {
+    const el = document.getElementById('trends-generated-note');
+    if (!el) return;
+    if (!TrendsContentStore.generatedAt) {
+      el.textContent = 'Contenido inicial, todavía sin regenerar.';
+      return;
+    }
+    const date = new Date(TrendsContentStore.generatedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+    el.textContent = `Actualizado por última vez el ${date}.`;
+  },
+
+  async refresh() {
+    if (this.refreshing) return;
+    this.refreshing = true;
+    const btn = document.getElementById('btn-refresh-trends');
+    const originalLabel = btn ? btn.textContent : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Actualizando…';
+    }
+
+    try {
+      const { data, error } = await supabaseClient.functions.invoke('generate-trends', { body: {} });
+      if (error || !data?.ok) throw error || new Error('generation_failed');
+      showToast('Tendencias actualizadas');
+      // La suscripción realtime (js/store.js) ya recarga TrendsContentStore
+      // y vuelve a llamar a render(), pero por si acaso la conexión
+      // realtime no está disponible, se fuerza también aquí.
+      await TrendsContentStore._load();
+      this.render();
+    } catch (err) {
+      console.error('No se pudo actualizar el contenido de tendencias', err);
+      showToast('No se pudieron actualizar las tendencias. Inténtalo de nuevo.', 'error');
+    } finally {
+      this.refreshing = false;
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalLabel;
+      }
+    }
   }
 };

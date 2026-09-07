@@ -365,6 +365,34 @@ const CompanyStore = {
   }
 };
 
+/* Contenido de la pestaña "Tendencias" (subtítulo + estilos de cada
+   categoría), generado por IA y guardado en la tabla "tendencias" en vez de
+   fijo en js/trends.js (ver supabase/trends-content.sql y la Edge Function
+   "generate-trends"). Fila única, igual que "empresa". */
+const TrendsContentStore = {
+  cache: [],
+  generatedAt: null,
+
+  async _load() {
+    // Igual que CompanyStore: no debe romper el arranque si todavía no se
+    // ha ejecutado supabase/trends-content.sql.
+    try {
+      const { data, error } = await supabaseClient.from('tendencias').select('data, generated_at').eq('id', true).maybeSingle();
+      if (error) throw error;
+      if (data) {
+        this.cache = Array.isArray(data.data) ? data.data : [];
+        this.generatedAt = data.generated_at || null;
+      }
+    } catch (err) {
+      console.warn('No se pudo cargar el contenido de tendencias (¿falta ejecutar supabase/trends-content.sql?)', err);
+    }
+  },
+
+  getSections() {
+    return this.cache;
+  }
+};
+
 /* Carga inicial de todas las tablas y sincronización en tiempo real entre
    dispositivos: cuando alguien crea/edita/borra algo desde otro navegador,
    recargamos la tabla afectada y avisamos al resto de la app con un evento. */
@@ -378,6 +406,7 @@ const DataStore = {
       EmployeeStore._load(),
       ScheduleStore._load(),
       CompanyStore._load(),
+      TrendsContentStore._load(),
     ]);
   },
 
@@ -458,6 +487,10 @@ const DataStore = {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'empresa' }, async () => {
         await CompanyStore._load();
         window.dispatchEvent(new CustomEvent('empresa:changed'));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tendencias' }, async () => {
+        await TrendsContentStore._load();
+        window.dispatchEvent(new CustomEvent('tendencias:changed'));
       })
       .subscribe();
   }
