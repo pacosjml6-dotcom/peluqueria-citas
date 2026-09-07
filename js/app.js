@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     Backup.init();
     DataWipe.init();
     Statistics.init();
+    Trends.init();
     ChatAssistant.init();
 
     DataStore.subscribeRealtime();
@@ -121,6 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       { tab: 'tab-clients', view: 'view-clients', newBtn: 'btn-new-client' },
       { tab: 'tab-employees', view: 'view-employees', newBtn: 'btn-new-employee' },
       { tab: 'tab-statistics', view: 'view-statistics' },
+      { tab: 'tab-trends', view: 'view-trends' },
     ];
 
     function showTab(activeTab) {

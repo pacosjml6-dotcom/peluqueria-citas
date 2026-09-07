@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=54">
+  <link rel="stylesheet" href="css/styles.css?v=55">
 </head>
 <body>
   <div id="app-loading-overlay" class="app-loading-overlay">
@@ -67,6 +67,10 @@
         <button id="tab-statistics" class="tab-btn" type="button">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"></path><path d="M12 20V4"></path><path d="M20 20v-7"></path><path d="M2 20h20"></path></svg>
           <span class="tab-btn-label">Estadísticas</span>
+        </button>
+        <button id="tab-trends" class="tab-btn" type="button">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+          <span class="tab-btn-label">Tendencias</span>
         </button>
       </nav>
 
@@ -329,6 +333,17 @@
         </div>
         <div id="stats-selfBooked-view" class="stats-chart-body"></div>
       </section>
+    </main>
+
+    <main class="stats-view hidden" id="view-trends">
+      <section class="stats-filter-card card trends-intro-card">
+        <h2 class="trends-intro-title">Tendencias del sector 2026</h2>
+        <p class="trends-intro-text">Inspiración editorial para proponer a tus clientes: la moda capilar de este año apuesta por la naturalidad, menos artificio y más textura propia, con cortes que se mueven bien y peinados con vida en vez de looks muy encorsetados.</p>
+      </section>
+
+      <div id="trends-sections"></div>
+
+      <p class="trends-disclaimer">Contenido curado a partir de reportajes de moda y peluquería de 2026. Actualízalo desde <code>js/trends.js</code> cuando cambien las tendencias de temporada.</p>
     </main>
     </div>
   </div>
@@ -737,7 +752,8 @@
   <script src="js/clients.js?v=20"></script>
   <script src="js/employees.js?v=18"></script>
   <script src="js/statistics.js?v=21"></script>
+  <script src="js/trends.js?v=1"></script>
   <script src="js/chatbot.js?v=1"></script>
-  <script src="js/app.js?v=25"></script>
+  <script src="js/app.js?v=26"></script>
 </body>
 </html>
