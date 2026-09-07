@@ -1,7 +1,11 @@
-/* CRUD de empleados: modal de formulario, foto circular, confirmación de borrado y listado */
+/* CRUD de empleados: modal de formulario, foto circular, confirmación de borrado,
+   listado y conteo de citas asignadas por empleado en un rango de fechas elegible */
 const Employees = {
   pendingDeleteId: null,
   currentPhotoDataUrl: null,
+  currentPreset: 'month',
+  rangeStart: null,
+  rangeEnd: null,
 
   init() {
     document.getElementById('btn-new-employee').addEventListener('click', () => this.openForm());
@@ -29,7 +33,65 @@ const Employees = {
       else if (!document.getElementById('employee-modal-overlay').classList.contains('hidden')) this.closeForm();
     });
 
+    this.populateFilterPresets();
+    document.getElementById('employees-range-start').addEventListener('change', () => this.handleCustomRangeChange());
+    document.getElementById('employees-range-end').addEventListener('change', () => this.handleCustomRangeChange());
+
+    this.setPreset(this.currentPreset);
+  },
+
+  populateFilterPresets() {
+    const container = document.getElementById('employees-filter-presets');
+    container.innerHTML = STATS_PRESETS
+      .map(p => `<button type="button" class="filter-preset-btn" data-preset="${p.id}">${p.label}</button>`)
+      .join('');
+    container.querySelectorAll('.filter-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => this.setPreset(btn.dataset.preset));
+    });
+  },
+
+  setPreset(id) {
+    this.currentPreset = id;
+    const computed = computeRangeForPreset(id);
+    if (computed) {
+      this.rangeStart = computed.start;
+      this.rangeEnd = computed.end;
+    }
+    this.syncPresetButtons();
     this.renderList();
+  },
+
+  syncPresetButtons() {
+    document.querySelectorAll('#employees-filter-presets .filter-preset-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.preset === this.currentPreset);
+    });
+  },
+
+  handleCustomRangeChange() {
+    const start = document.getElementById('employees-range-start').value;
+    const end = document.getElementById('employees-range-end').value;
+    if (!start || !end || start > end) {
+      showToast('Selecciona un rango de fechas válido', 'error');
+      return;
+    }
+    this.rangeStart = start;
+    this.rangeEnd = end;
+    this.currentPreset = 'custom';
+    this.syncPresetButtons();
+    this.renderList();
+  },
+
+  getEffectiveRange() {
+    if (this.currentPreset !== 'all') {
+      return { start: this.rangeStart, end: this.rangeEnd };
+    }
+    const all = Store.getAll();
+    if (all.length === 0) {
+      const today = toISODate(new Date());
+      return { start: today, end: today };
+    }
+    const dates = all.map(a => a.date).sort();
+    return { start: dates[0], end: dates[dates.length - 1] };
   },
 
   openForm(employee = null) {
@@ -168,6 +230,19 @@ const Employees = {
     const list = document.getElementById('employees-list');
     const employees = EmployeeStore.getAll().sort((a, b) => a.name.localeCompare(b.name, 'es'));
 
+    const range = this.getEffectiveRange();
+    document.getElementById('employees-range-start').value = range.start;
+    document.getElementById('employees-range-end').value = range.end;
+    document.getElementById('employees-range-summary').textContent =
+      `Citas asignadas del ${formatStatsDate(range.start)} al ${formatStatsDate(range.end)}.`;
+
+    const apptsInRange = Store.getAll().filter(a => a.date >= range.start && a.date <= range.end);
+    const countByEmployee = new Map();
+    apptsInRange.forEach(a => {
+      if (!a.employeeId) return;
+      countByEmployee.set(a.employeeId, (countByEmployee.get(a.employeeId) || 0) + 1);
+    });
+
     if (employees.length === 0) {
       list.innerHTML = '<div class="empty-state"><p>No hay empleados dados de alta todavía.</p></div>';
       return;
@@ -179,13 +254,16 @@ const Employees = {
         ? `<img src="${employee.photo}" alt="" class="employee-avatar-img">`
         : escapeHtml(getInitials(employee.name));
 
+      const count = countByEmployee.get(employee.id) || 0;
+      const noun = count === 1 ? 'cita asignada' : 'citas asignadas';
+
       const item = document.createElement('div');
       item.className = 'client-item employee-item';
       item.innerHTML = `
         <div class="client-avatar employee-avatar">${avatarInner}</div>
         <div class="client-info">
           <div class="client-name">${escapeHtml(employee.name)}</div>
-          <div class="client-detail">Citas asignadas: próximamente</div>
+          <div class="client-detail">${count} ${noun}</div>
         </div>
         <div class="client-actions">
           <button class="btn-icon btn-edit" aria-label="Editar empleado" title="Editar">&#9998;</button>

@@ -89,6 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       PendingPayments.updateBadge();
       if (PendingPayments.isOpen()) PendingPayments.render();
       if (!document.getElementById('view-statistics').classList.contains('hidden')) Statistics.renderAll();
+      if (!document.getElementById('view-employees').classList.contains('hidden')) Employees.renderList();
     });
     window.addEventListener('clientes:changed', () => {
       Appointments.populateClientsDatalist();

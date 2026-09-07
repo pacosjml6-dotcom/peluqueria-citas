@@ -1898,6 +1898,15 @@ button {
   color: var(--color-text-muted);
 }
 
+.employees-filter-row {
+  flex: 0 0 auto;
+  margin-bottom: 4px;
+}
+
+#employees-range-summary {
+  margin-bottom: 16px;
+}
+
 .stats-kpi-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
