@@ -5,7 +5,15 @@
    No se usan fotografías reales (no hay forma fiable de enlazar imágenes
    de terceros con derechos claros y sin riesgo de que el enlace se rompa),
    así que cada categoría lleva una ilustración vectorial propia dibujada
-   a mano en SVG, a juego con el resto de iconos de la app. */
+   a mano en SVG, a juego con el resto de iconos de la app.
+
+   Por el mismo motivo, cada estilo enlaza a una búsqueda de Pinterest (en
+   vez de a un artículo concreto de una revista, cuyo enlace puede caducar)
+   para que el cliente vea ejemplos visuales reales y siempre disponibles. */
+function pinterestSearch(query) {
+  return `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(query)}`;
+}
+
 const TRENDS_DATA = [
   {
     id: 'cortes',
@@ -24,10 +32,10 @@ const TRENDS_DATA = [
       <line x1="8.7" y1="8.7" x2="12.2" y2="12.2"></line>
     `,
     items: [
-      { title: 'Bob italiano', desc: 'Por encima del hombro, líneas limpias y muy favorecedor. El corte femenino más pedido en salón.' },
-      { title: 'Shag texturizado', desc: 'Capas suaves y desfiladas que aportan movimiento; ideal para dar cuerpo al cabello fino.' },
-      { title: 'Flequillo cortina', desc: 'Sigue siendo tendencia, sobre todo combinado con melenas midi o long bob.' },
-      { title: 'Mullet moderno', desc: 'Versión suavizada del clásico, con capas que dan volumen sin resultar agresivo.' },
+      { title: 'Bob italiano', desc: 'Por encima del hombro, líneas limpias y muy favorecedor. El corte femenino más pedido en salón.', link: pinterestSearch('bob italiano corte de pelo') },
+      { title: 'Shag texturizado', desc: 'Capas suaves y desfiladas que aportan movimiento; ideal para dar cuerpo al cabello fino.', link: pinterestSearch('shag texturizado corte de pelo') },
+      { title: 'Flequillo cortina', desc: 'Sigue siendo tendencia, sobre todo combinado con melenas midi o long bob.', link: pinterestSearch('flequillo cortina melena midi') },
+      { title: 'Mullet moderno', desc: 'Versión suavizada del clásico, con capas que dan volumen sin resultar agresivo.', link: pinterestSearch('mullet moderno corte de pelo') },
     ],
   },
   {
@@ -46,10 +54,10 @@ const TRENDS_DATA = [
       <circle cx="17.3" cy="15.5" r="1.7" fill="#f2d49b" stroke="none"></circle>
     `,
     items: [
-      { title: 'Balayage en tonos beige', desc: 'Frío y arena claro, para un resultado limpio, moderno y de bajo mantenimiento.' },
-      { title: 'Rubios grises nórdicos', desc: 'Reflejo perlado grisáceo conseguido con balayage o babylights.' },
-      { title: 'Castaños iluminados', desc: 'Base oscura con reflejos cálidos casi imperceptibles que aportan profundidad.' },
-      { title: 'Cobrizos editoriales', desc: 'Tonos cobre ricos y dimensionados, entre cálido y profundo, con acabado muy cuidado.' },
+      { title: 'Balayage en tonos beige', desc: 'Frío y arena claro, para un resultado limpio, moderno y de bajo mantenimiento.', link: pinterestSearch('balayage tonos beige') },
+      { title: 'Rubios grises nórdicos', desc: 'Reflejo perlado grisáceo conseguido con balayage o babylights.', link: pinterestSearch('rubio gris nórdico balayage') },
+      { title: 'Castaños iluminados', desc: 'Base oscura con reflejos cálidos casi imperceptibles que aportan profundidad.', link: pinterestSearch('castaño iluminado reflejos') },
+      { title: 'Cobrizos editoriales', desc: 'Tonos cobre ricos y dimensionados, entre cálido y profundo, con acabado muy cuidado.', link: pinterestSearch('tinte cobrizo editorial') },
     ],
   },
   {
@@ -65,9 +73,28 @@ const TRENDS_DATA = [
       <path d="M2 18c4-3 6 3 10 0s6-3 10 0" fill="none"></path>
     `,
     items: [
-      { title: 'Ondas naturales', desc: 'Movimiento relajado, volumen en la raíz y mechones sueltos, sin looks demasiado pulidos.' },
-      { title: 'Revival años 70', desc: 'Capas abundantes, ondas al aire y volumen texturizado a lo largo de toda la melena.' },
-      { title: 'Recogidos desenfadados', desc: 'Menos estructura, más naturalidad: el peinado "con vida" gana terreno a lo perfecto.' },
+      { title: 'Ondas naturales', desc: 'Movimiento relajado, volumen en la raíz y mechones sueltos, sin looks demasiado pulidos.', link: pinterestSearch('ondas naturales peinado') },
+      { title: 'Revival años 70', desc: 'Capas abundantes, ondas al aire y volumen texturizado a lo largo de toda la melena.', link: pinterestSearch('peinado revival años 70') },
+      { title: 'Recogidos desenfadados', desc: 'Menos estructura, más naturalidad: el peinado "con vida" gana terreno a lo perfecto.', link: pinterestSearch('recogido desenfadado peinado') },
+    ],
+  },
+  {
+    id: 'barbas',
+    title: 'Barbas',
+    subtitle: 'Los estilos de barba con más demanda',
+    color: 'var(--chart-series-3)',
+    bg: 'rgba(27, 175, 122, 0.12)',
+    // Silueta de mandíbula con barba y una línea de bigote.
+    heroIcon: `
+      <circle cx="12" cy="7.5" r="4" stroke-opacity="0.35"></circle>
+      <path d="M5 9c-1.2 3-1 6.2 1.2 8.4 2 2 3.8 2.8 5.8 2.8s3.8-.8 5.8-2.8C20 15.2 20.2 12 19 9"></path>
+      <path d="M8.7 14.2c1 1 2.1 1.5 3.3 1.5s2.3-.5 3.3-1.5"></path>
+    `,
+    items: [
+      { title: 'Barba corta degradada', desc: 'Densidad uniforme con fade en los laterales; el estilo más pedido en barbería.', link: pinterestSearch('barba corta degradada fade') },
+      { title: 'Barba candado', desc: 'Perilla y bigote conectados por una línea fina, dejando las mejillas rasuradas.', link: pinterestSearch('barba candado estilo') },
+      { title: 'Barba desconectada', desc: 'Bigote y barba trabajados como piezas independientes, con un hueco marcado entre ambos.', link: pinterestSearch('barba desconectada bigote') },
+      { title: 'Barba tipo boxeada', desc: 'Contorno muy definido y recto, manteniendo el volumen natural del pelo por dentro.', link: pinterestSearch('barba boxeada estilo') },
     ],
   },
 ];
@@ -95,6 +122,7 @@ const Trends = {
             <div class="trend-card" style="border-left-color:${section.color}">
               <div class="trend-card-title">${escapeHtml(item.title)}</div>
               <div class="trend-card-desc">${escapeHtml(item.desc)}</div>
+              ${item.link ? `<a class="trend-card-link" href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer" style="color:${section.color}">Ver inspiración →</a>` : ''}
             </div>
           `).join('')}
         </div>
