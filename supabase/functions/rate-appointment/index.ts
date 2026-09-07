@@ -21,6 +21,10 @@ function starsHtml(count: number): string {
   return `<span style="font-size:36px;letter-spacing:4px;color:#d9a441;">${stars}</span>`;
 }
 
+function sentBadge(): string {
+  return '<p class="badge">✓ Valoración enviada</p>';
+}
+
 function page(title: string, bodyHtml: string, status = 200): Response {
   const html = `<!DOCTYPE html>
 <html lang="es">
@@ -35,6 +39,8 @@ function page(title: string, bodyHtml: string, status = 200): Response {
          background:#f1f1ee; font-family:'Inter',system-ui,sans-serif; color:#171716; box-sizing:border-box; }
   .card { max-width:420px; width:100%; background:#ffffff; border:1px solid #e7e7e2; border-radius:18px;
           padding:32px 28px; text-align:center; box-shadow:0 6px 16px rgba(20,20,25,0.06); }
+  .badge { display:inline-block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+           color:#1a8754; background:rgba(26,135,84,.12); padding:4px 10px; border-radius:999px; margin:0 0 14px; }
   h1 { font-size:20px; margin:16px 0 8px; }
   p { font-size:14px; line-height:1.5; color:#5a5a56; margin:0 0 4px; }
 </style>
@@ -73,16 +79,26 @@ Deno.serve(async (req) => {
   }
 
   if (appt.rated_at) {
-    return page('Ya has valorado esta cita', `
+    return page('Valoración ya enviada', `
+      ${sentBadge()}
       ${starsHtml(appt.rating || 0)}
-      <h1>¡Ya nos diste tu opinión!</h1>
-      <p>Valoraste esta cita con ${appt.rating} de 5. Gracias de nuevo.</p>`);
+      <h1>Esta valoración ya se envió</h1>
+      <p>La valoraste con ${appt.rating} de 5. Ya no se puede volver a enviar ni cambiar desde este enlace.</p>`);
   }
 
-  const { error: updateError } = await admin
+  // Update "atómico": solo escribe si SIGUE sin valorar en este mismo
+  // instante (comprobado por Postgres, no por el código de arriba), para
+  // blindar el caso de dos clics casi seguidos en el correo -- por
+  // ejemplo, tocar dos estrellas distintas muy rápido, o abrir el mismo
+  // enlace en dos pestañas -- que sin esta condición podrían colar dos
+  // valoraciones distintas para la misma cita.
+  const { data: updated, error: updateError } = await admin
     .from('citas')
     .update({ rating, rated_at: new Date().toISOString() })
-    .eq('id', id);
+    .eq('id', id)
+    .is('rated_at', null)
+    .select('rating')
+    .maybeSingle();
 
   if (updateError) {
     console.error('No se pudo guardar la valoración', updateError);
@@ -91,7 +107,19 @@ Deno.serve(async (req) => {
       <p>Inténtalo de nuevo en unos minutos.</p>`, 500);
   }
 
-  return page('¡Gracias por tu valoración!', `
+  if (!updated) {
+    // Alguien se adelantó justo entre la comprobación de arriba y este
+    // update (mismo margen de segundos): se respeta esa primera valoración.
+    const { data: fresh } = await admin.from('citas').select('rating').eq('id', id).maybeSingle();
+    return page('Valoración ya enviada', `
+      ${sentBadge()}
+      ${starsHtml(fresh?.rating || rating)}
+      <h1>Esta valoración ya se envió</h1>
+      <p>La valoraste con ${fresh?.rating ?? rating} de 5. Ya no se puede volver a enviar ni cambiar desde este enlace.</p>`);
+  }
+
+  return page('Valoración enviada', `
+    ${sentBadge()}
     ${starsHtml(rating)}
     <h1>¡Gracias, ${escapeHtml(appt.name || '')}!</h1>
     <p>Has valorado tu cita como "${STAR_LABELS[rating]}" (${rating} de 5).</p>
