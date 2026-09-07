@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=50">
+  <link rel="stylesheet" href="css/styles.css?v=53">
 </head>
 <body class="public-booking-body">
   <main class="qr-page">
@@ -17,6 +17,7 @@
       <p class="public-booking-subtitle">Apunta la cámara del móvil al código</p>
       <div id="qr-canvas-wrap" class="qr-canvas-wrap"></div>
       <p class="qr-link" id="qr-link"></p>
+      <button type="button" id="qr-copy-btn" class="btn btn-primary qr-copy-btn">Copiar enlace</button>
     </div>
   </main>
 
@@ -38,6 +39,35 @@
       document.getElementById('qr-canvas-wrap').textContent = 'No se pudo generar el código QR.';
       console.error(error);
     }
+
+    const copyBtn = document.getElementById('qr-copy-btn');
+    const defaultLabel = copyBtn.textContent;
+    copyBtn.addEventListener('click', async () => {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(targetUrl);
+        } else {
+          const textarea = document.createElement('textarea');
+          textarea.value = targetUrl;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          textarea.remove();
+        }
+        copyBtn.textContent = 'Enlace copiado ✓';
+        copyBtn.disabled = true;
+        setTimeout(() => {
+          copyBtn.textContent = defaultLabel;
+          copyBtn.disabled = false;
+        }, 2000);
+      } catch (error) {
+        console.error(error);
+        copyBtn.textContent = 'No se pudo copiar';
+        setTimeout(() => { copyBtn.textContent = defaultLabel; }, 2000);
+      }
+    });
   </script>
 </body>
 </html>

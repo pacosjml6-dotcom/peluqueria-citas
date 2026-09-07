@@ -2364,6 +2364,12 @@ body.public-booking-body {
   word-break: break-all;
 }
 
+.qr-copy-btn {
+  margin-top: 18px;
+  width: 100%;
+  justify-content: center;
+}
+
 /* Temporizador y entrada del código de confirmación por correo */
 .pb-otp-timer-wrap {
   text-align: center;
