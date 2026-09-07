@@ -28,6 +28,9 @@ function citaFromRow(row) {
     createdByClient: row.created_by_client || false,
     paid: row.paid || false,
     extraTime: row.extra_time || false,
+    surveySentAt: row.survey_sent_at || null,
+    rating: row.rating || null,
+    ratedAt: row.rated_at || null,
   };
 }
 

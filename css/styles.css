@@ -1928,6 +1928,13 @@ button {
   gap: 12px;
 }
 
+/* Para cuadrículas de KPI con menos de 5 tarjetas (p.ej. Valoraciones):
+   se adapta sola al ancho disponible en vez de dejar columnas vacías del
+   grid de 5 fijas de arriba, así que no necesita los breakpoints de abajo. */
+.stats-kpi-grid-compact {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
 .stats-kpi-tile {
   display: flex;
   flex-direction: column;

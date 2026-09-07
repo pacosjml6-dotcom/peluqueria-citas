@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     Backup.init();
     DataWipe.init();
     Statistics.init();
+    Ratings.init();
     Trends.init();
     ChatAssistant.init();
 
@@ -90,6 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       PendingPayments.updateBadge();
       if (PendingPayments.isOpen()) PendingPayments.render();
       if (!document.getElementById('view-statistics').classList.contains('hidden')) Statistics.renderAll();
+      if (!document.getElementById('view-ratings').classList.contains('hidden')) Ratings.renderAll();
       if (!document.getElementById('view-employees').classList.contains('hidden')) Employees.renderList();
     });
     window.addEventListener('clientes:changed', () => {
@@ -122,6 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       { tab: 'tab-clients', view: 'view-clients', newBtn: 'btn-new-client' },
       { tab: 'tab-employees', view: 'view-employees', newBtn: 'btn-new-employee' },
       { tab: 'tab-statistics', view: 'view-statistics' },
+      { tab: 'tab-ratings', view: 'view-ratings' },
       { tab: 'tab-trends', view: 'view-trends' },
     ];
 
@@ -135,6 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (activeTab === 'tab-clients') Clients.renderList();
       if (activeTab === 'tab-employees') Employees.renderList();
       if (activeTab === 'tab-statistics') Statistics.renderAll();
+      if (activeTab === 'tab-ratings') Ratings.renderAll();
     }
 
     tabs.forEach(({ tab }) => {

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=58">
+  <link rel="stylesheet" href="css/styles.css?v=59">
 </head>
 <body>
   <div id="app-loading-overlay" class="app-loading-overlay">
@@ -67,6 +67,10 @@
         <button id="tab-statistics" class="tab-btn" type="button">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"></path><path d="M12 20V4"></path><path d="M20 20v-7"></path><path d="M2 20h20"></path></svg>
           <span class="tab-btn-label">Estadísticas</span>
+        </button>
+        <button id="tab-ratings" class="tab-btn" type="button">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6-4.4-4.2 6-.8z"></path></svg>
+          <span class="tab-btn-label">Valoraciones</span>
         </button>
         <button id="tab-trends" class="tab-btn" type="button">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
@@ -332,6 +336,66 @@
           <button type="button" class="btn btn-ghost btn-view-toggle" data-target="selfBooked">Ver tabla</button>
         </div>
         <div id="stats-selfBooked-view" class="stats-chart-body"></div>
+      </section>
+    </main>
+
+    <main class="stats-view hidden" id="view-ratings">
+      <section class="stats-filter-card card trends-intro-card">
+        <h2 class="trends-intro-title">Valoraciones de clientes</h2>
+        <p class="trends-intro-text">Lo que opinan los clientes al pulsar una de las estrellas del correo de encuesta que se les manda cuando pasa su cita.</p>
+      </section>
+
+      <div class="stats-kpi-grid stats-kpi-grid-compact">
+        <div class="stats-kpi-tile card">
+          <div class="stats-kpi-top">
+            <span class="stats-kpi-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6-4.4-4.2 6-.8z"></path></svg>
+            </span>
+          </div>
+          <span id="ratings-kpi-average" class="stats-kpi-value">—</span>
+          <span class="stats-kpi-label">Valoración media</span>
+          <span id="ratings-kpi-average-sub" class="stats-kpi-sub">Sin datos</span>
+        </div>
+        <div class="stats-kpi-tile card">
+          <div class="stats-kpi-top">
+            <span class="stats-kpi-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H7l-3 3z"></path></svg>
+            </span>
+          </div>
+          <span id="ratings-kpi-total" class="stats-kpi-value">0</span>
+          <span class="stats-kpi-label">Valoraciones recibidas</span>
+          <span id="ratings-kpi-total-sub" class="stats-kpi-sub">Sin datos</span>
+        </div>
+        <div class="stats-kpi-tile card">
+          <div class="stats-kpi-top">
+            <span class="stats-kpi-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 1 3 6.2"></path><path d="M4 18v-4h4"></path></svg>
+            </span>
+          </div>
+          <span id="ratings-kpi-response" class="stats-kpi-value">—</span>
+          <span class="stats-kpi-label">Tasa de respuesta</span>
+          <span id="ratings-kpi-response-sub" class="stats-kpi-sub">Sin datos</span>
+        </div>
+      </div>
+
+      <section class="stats-chart-card card">
+        <div class="stats-chart-header">
+          <div>
+            <h3>Distribución de valoraciones</h3>
+            <p class="stats-chart-subtitle">Cuántas valoraciones ha recibido cada puntuación</p>
+          </div>
+        </div>
+        <div id="ratings-distribution" class="stats-chart-body"></div>
+      </section>
+
+      <section class="stats-chart-card card">
+        <div class="stats-chart-header">
+          <div>
+            <h3>Últimas valoraciones</h3>
+            <p class="stats-chart-subtitle">De más reciente a más antigua</p>
+          </div>
+        </div>
+        <div id="ratings-list" class="stats-chart-body"></div>
       </section>
     </main>
 
@@ -739,7 +803,7 @@
   <div id="toast" class="toast hidden"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/store.js?v=23"></script>
+  <script src="js/store.js?v=24"></script>
   <script src="js/countries.js?v=17"></script>
   <script src="js/calendar.js?v=17"></script>
   <script src="js/schedule.js?v=18"></script>
@@ -752,8 +816,9 @@
   <script src="js/clients.js?v=20"></script>
   <script src="js/employees.js?v=18"></script>
   <script src="js/statistics.js?v=22"></script>
+  <script src="js/ratings.js?v=1"></script>
   <script src="js/trends.js?v=5"></script>
   <script src="js/chatbot.js?v=1"></script>
-  <script src="js/app.js?v=26"></script>
+  <script src="js/app.js?v=27"></script>
 </body>
 </html>
