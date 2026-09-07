@@ -398,7 +398,7 @@ function buildTimelineBuckets(appts, start, end) {
    color pasara a representar a otra persona de una consulta a otra. */
 function renderRankingChart(containerEl, items) {
   const max = Math.max(1, ...items.map(i => i.value));
-  const rowsHtml = items.map((item) => {
+  const rowsHtml = items.map((item, i) => {
     const pct = Math.max(4, Math.round((item.value / max) * 100));
     const color = item.isOther ? 'var(--chart-other)' : 'var(--chart-series-1)';
     const noun = item.value === 1 ? 'cita' : 'citas';
@@ -406,7 +406,7 @@ function renderRankingChart(containerEl, items) {
       <div class="hbar-row" tabindex="0" data-tooltip="${escapeHtml(item.label)}: ${item.value} ${noun}">
         <div class="hbar-label" title="${escapeHtml(item.label)}">${escapeHtml(item.label)}</div>
         <div class="hbar-track">
-          <div class="hbar-fill" style="width:${pct}%; background:${color};"></div>
+          <div class="hbar-fill" style="width:${pct}%; background:${color}; --i:${i};"></div>
         </div>
         <div class="hbar-value">${item.value}</div>
       </div>`;
@@ -548,6 +548,25 @@ function renderTimelineChart(containerEl, buckets) {
   const svg = containerEl.querySelector('svg');
   const crosshair = svg.querySelector('.tl-crosshair');
   const hoverDot = svg.querySelector('.tl-hover-dot');
+
+  // Dibuja la línea de izquierda a derecha animando su stroke-dashoffset.
+  // La longitud del trazo depende de los datos, así que no se puede fijar
+  // de antemano en CSS: se mide con getTotalLength() y se anima desde aquí.
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lineEl = svg.querySelector('.tl-line');
+  if (lineEl) {
+    if (reduceMotion) {
+      lineEl.style.strokeDasharray = 'none';
+    } else {
+      const length = lineEl.getTotalLength();
+      lineEl.style.strokeDasharray = `${length}`;
+      lineEl.style.strokeDashoffset = `${length}`;
+      requestAnimationFrame(() => {
+        lineEl.style.transition = 'stroke-dashoffset 900ms cubic-bezier(0.16, 1, 0.3, 1)';
+        lineEl.style.strokeDashoffset = '0';
+      });
+    }
+  }
 
   svg.querySelectorAll('.tl-hit').forEach((hit) => {
     hit.addEventListener('pointerenter', () => {
