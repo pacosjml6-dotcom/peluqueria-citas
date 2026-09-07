@@ -2044,14 +2044,19 @@ button {
   gap: 16px;
 }
 
-.stats-chart-header h3 {
-  display: flex;
+.trends-section-header {
   align-items: center;
-  gap: 8px;
+  justify-content: flex-start;
+  gap: 14px;
 }
 
-.trends-section-icon {
-  display: inline-flex;
+.trends-hero-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   flex: 0 0 auto;
 }
 
