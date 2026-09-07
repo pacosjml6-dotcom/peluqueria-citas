@@ -2009,12 +2009,15 @@ button {
 
 .stats-kpi-tile {
   position: relative;
-  overflow: hidden;
   --tile-accent: var(--chart-series-1);
   animation: stats-tile-in 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
   transition: transform var(--transition), box-shadow var(--transition);
 }
 
+/* Redondeada por su cuenta (en vez de recortar toda la tarjeta con
+   overflow:hidden), para no arriesgarnos a cortar el contenido de la
+   tarjeta -- por ejemplo el SVG del gráfico de evolución, que necesita
+   "overflow: visible" para su cruceta y etiquetas al hacer hover. */
 .stats-kpi-tile::before {
   content: '';
   position: absolute;
@@ -2022,6 +2025,7 @@ button {
   left: 0;
   right: 0;
   height: 3px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   background: var(--tile-accent);
 }
 
@@ -2059,7 +2063,6 @@ button {
 .stats-chart-card {
   padding: 16px;
   position: relative;
-  overflow: hidden;
   animation: stats-card-in 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
   transition: transform var(--transition), box-shadow var(--transition);
 }
@@ -2071,6 +2074,7 @@ button {
   left: 0;
   right: 0;
   height: 3px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   background: linear-gradient(90deg, var(--chart-series-1), var(--chart-series-7));
   opacity: 0.7;
 }
