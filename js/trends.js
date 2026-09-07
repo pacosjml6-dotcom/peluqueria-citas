@@ -19,8 +19,8 @@ function imageSearch(query) {
 const TRENDS_DATA = [
   {
     id: 'cortes',
-    title: 'Cortes',
-    subtitle: 'Los cortes que más se piden esta temporada',
+    title: 'Cortes femeninos',
+    subtitle: 'Los cortes de mujer que más se piden esta temporada',
     color: 'var(--chart-series-1)',
     bg: 'rgba(42, 120, 214, 0.12)',
     // Tijera abriéndose sobre un mechón que cae, sugiriendo el corte.
@@ -38,6 +38,28 @@ const TRENDS_DATA = [
       { title: 'Shag texturizado', desc: 'Capas suaves y desfiladas que aportan movimiento; ideal para dar cuerpo al cabello fino.', link: imageSearch('shag texturizado corte de pelo') },
       { title: 'Flequillo cortina', desc: 'Sigue siendo tendencia, sobre todo combinado con melenas midi o long bob.', link: imageSearch('flequillo cortina melena midi') },
       { title: 'Mullet moderno', desc: 'Versión suavizada del clásico, con capas que dan volumen sin resultar agresivo.', link: imageSearch('mullet moderno corte de pelo') },
+    ],
+  },
+  {
+    id: 'cortes-masculinos',
+    title: 'Cortes masculinos',
+    subtitle: 'Los cortes de hombre que más se piden esta temporada',
+    color: 'var(--chart-series-4)',
+    bg: 'rgba(237, 161, 0, 0.12)',
+    // Peine con púas, representando el arreglo y peinado masculino.
+    heroIcon: `
+      <rect x="3" y="4" width="18" height="4" rx="1" stroke-opacity="0.35"></rect>
+      <line x1="5" y1="8" x2="5" y2="14"></line>
+      <line x1="8.4" y1="8" x2="8.4" y2="15.5"></line>
+      <line x1="11.8" y1="8" x2="11.8" y2="13"></line>
+      <line x1="15.2" y1="8" x2="15.2" y2="16"></line>
+      <line x1="18.6" y1="8" x2="18.6" y2="12.5"></line>
+    `,
+    items: [
+      { title: 'Crop francés texturizado', desc: 'Flequillo corto y texturizado arriba combinado con fade en los laterales.', link: imageSearch('corte crop francés texturizado hombre') },
+      { title: 'Buzz cut', desc: 'Rapado uniforme muy corto, de bajo mantenimiento y muy versátil.', link: imageSearch('buzz cut corte de pelo hombre') },
+      { title: 'Low fade con raya definida', desc: 'Degradado bajo y sutil rematado con una raya marcada a un lado.', link: imageSearch('low fade raya definida corte hombre') },
+      { title: 'Undercut peinado hacia atrás', desc: 'Laterales muy cortos y parte superior larga peinada hacia atrás, estilo slick back.', link: imageSearch('undercut slick back corte hombre') },
     ],
   },
   {
