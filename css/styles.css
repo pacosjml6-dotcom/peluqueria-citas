@@ -362,17 +362,26 @@ button {
 
 @media (max-width: 860px) {
   .app-main {
-    grid-template-columns: 1fr;
+    /* "minmax(0, 1fr)" y no un simple "1fr": una pista de grid en "1fr" a
+       secas no puede encoger por debajo del ancho mínimo de su contenido
+       (el típico "min-content" de CSS Grid), así que si alguna fila (p.ej.
+       una cita con nombre/teléfono largos) necesita más sitio del que cabe,
+       toda la columna -- y con ella la página entera -- se ensanchaba y
+       aparecía scroll horizontal en vez de recortar el texto con "…" como
+       ya está preparado para hacer. */
+    grid-template-columns: minmax(0, 1fr);
     overflow-y: auto;
   }
 
   /* La burbuja del chat (ver "Widget de chat" más abajo) queda fija sobre
      la esquina inferior derecha. Sin este hueco, la última fila de la
-     lista quedaría siempre parcialmente tapada por la burbuja al hacer
-     scroll; con él, siempre se puede desplazar hasta dejarla del todo
-     libre por encima. */
+     lista (o la última tarjeta de Estadísticas/Valoraciones/Tendencias)
+     quedaría siempre parcialmente tapada por la burbuja al hacer scroll;
+     con él, siempre se puede desplazar hasta dejarla del todo libre por
+     encima. */
   .appointments-list,
-  .clients-list {
+  .clients-list,
+  .stats-view {
     padding-bottom: 84px;
     scroll-padding-bottom: 84px;
   }
@@ -2214,7 +2223,7 @@ button {
 
 .hbar-row {
   display: grid;
-  grid-template-columns: 110px 1fr 28px;
+  grid-template-columns: 110px minmax(0, 1fr) 28px;
   align-items: center;
   gap: 8px;
   padding: 3px 4px;
@@ -2456,13 +2465,17 @@ button {
 .stats-table tbody tr:hover { background: var(--color-surface-alt); }
 
 @media (max-width: 860px) {
-  .stats-kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  .stats-charts-grid { grid-template-columns: 1fr; }
+  /* "minmax(0, 1fr)" y no un simple "1fr" (mismo motivo que en .app-main
+     más arriba): evita que una fila ancha (p.ej. un nombre de cliente
+     largo en el ranking) fuerce la columna, y con ella la página entera,
+     a desbordar por el lateral en vez de recortarse con "…". */
+  .stats-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats-charts-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 480px) {
-  .stats-kpi-grid { grid-template-columns: 1fr; }
-  .hbar-row { grid-template-columns: 84px 1fr 26px; }
+  .stats-kpi-grid { grid-template-columns: minmax(0, 1fr); }
+  .hbar-row { grid-template-columns: 84px minmax(0, 1fr) 26px; }
   .stats-range-inputs { flex-wrap: wrap; }
   .stats-filter-row { flex-direction: column; align-items: stretch; }
   .stats-filter-presets { border-radius: var(--radius-md); }
@@ -2485,6 +2498,10 @@ body.public-booking-body {
   align-items: flex-start;
   justify-content: center;
   padding: 32px 16px;
+  /* La burbuja del chat flota fija sobre la esquina inferior derecha (ver
+     "Widget de chat" más abajo): sin este hueco de sobra, taparía el botón
+     "Reservar cita" al llegar al final del formulario. */
+  padding-bottom: 100px;
 }
 
 .public-booking-card {
@@ -2653,7 +2670,7 @@ body.public-booking-body {
 }
 
 @media (max-width: 480px) {
-  .public-booking-page { padding: 16px 10px; }
+  .public-booking-page { padding: 16px 10px 90px; }
   .public-booking-card { padding: 16px; }
 }
 
@@ -2832,5 +2849,88 @@ body.public-booking-body {
      cerrar está el botón de la cabecera): así no asoma detrás del panel. */
   #chatbot-root:has(.chatbot-panel:not(.hidden)) .chatbot-bubble {
     visibility: hidden;
+  }
+}
+
+/* ==========================================================================
+   Móvil: tamaño táctil mínimo
+   ========================================================================== */
+/* En escritorio los controles se mantienen compactos a propósito (más
+   densidad, más información visible a la vez); en pantallas de móvil, en
+   cambio, un dedo es mucho menos preciso que un cursor, así que aquí se
+   garantizan los ~44px de alto mínimos recomendados para cualquier botón,
+   campo de formulario o control interactivo, sin tocar el tamaño de
+   escritorio. Se deja fuera a propósito ".clients-az-btn" (el índice A-Z de
+   la lista de clientes): ahí el patrón es un "scrubber" de precisión con 27
+   letras seguidas, como el índice alfabético de Contactos en iOS, y forzar
+   44px por letra lo haría inviable (más de 1000px de alto). */
+@media (max-width: 767px) {
+  .btn,
+  .btn-util,
+  .tab-btn,
+  .filter-preset-btn {
+    min-height: 44px;
+  }
+
+  .btn-icon,
+  /* Estos tres contextos encogen el .btn-icon normal (32px) todavía más
+     -- 28px, 26px y 24px -- para no ocupar tanto en filas compactas de
+     cita/cliente; en escritorio tiene sentido (más precisión con el
+     ratón), pero en móvil son objetivos demasiado pequeños para un dedo,
+     así que aquí recuperan el mismo mínimo táctil que cualquier otro
+     botón de icono. */
+  .appt-time-col .btn-icon,
+  .appt-actions .btn-icon,
+  .client-actions .btn-icon,
+  .chatbot-header .btn-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .appt-form input,
+  .appt-form select,
+  .appt-form textarea,
+  .clients-search-input,
+  .stats-range-inputs input[type="date"] {
+    min-height: 44px;
+  }
+
+  .chatbot-form #chatbot-input {
+    min-height: 44px;
+  }
+
+  .chatbot-send {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* La cabecera de Clientes (título + buscador) no tiene sitio para ir en
+     fila junto al sidebar colapsado: pasa a apilarse en columna, con el
+     buscador a ancho completo en vez de forzado a un min-width de 160px que
+     lo dejaba pisando al título. */
+  .clients-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .clients-search-wrap {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  /* La cabecera de Tendencias (título + párrafo + botón "Actualizar
+     tendencias") es la única que combina un texto largo con un botón de
+     etiqueta larga: en fila, el texto quedaba aplastado a una columna
+     estrechísima (una palabra por línea). El resto de cabeceras de tarjeta
+     (p.ej. "Ver tabla") son cortas y ya encajan bien en fila, así que este
+     apilado se deja solo para esta cabecera en concreto. */
+  .trends-intro-card .stats-chart-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .trends-intro-card #btn-refresh-trends {
+    align-self: flex-start;
   }
 }
