@@ -2894,6 +2894,25 @@ body.public-booking-body {
     height: 44px;
   }
 
+  /* Las filas de cita y de cliente meten hasta 3 iconos (WhatsApp, editar,
+     borrar) en la misma línea que el nombre/teléfono. A 44px de ancho cada
+     uno (arriba) ya no caben ahí sin aplastar esos datos a una columna
+     ilegible de un puñado de píxeles -- que es justo lo que pasaba: el
+     nombre y el teléfono quedaban tapados detrás de los propios botones.
+     En vez de eso, en móvil las acciones bajan a su propia fila, alineadas
+     a la derecha, dejando toda la fila de arriba para los datos. */
+  .appt-item,
+  .client-item {
+    flex-wrap: wrap;
+  }
+
+  .appt-actions,
+  .client-actions {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+
   .appt-form input,
   .appt-form select,
   .appt-form textarea,

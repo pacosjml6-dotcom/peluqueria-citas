@@ -59,6 +59,11 @@ function timeToMinutes(t: string): number {
   return h * 60 + (m || 0);
 }
 
+function formatSpanishDate(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
@@ -123,10 +128,11 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         sender: { name: EMAIL_FROM_NAME, email: EMAIL_FROM_ADDRESS },
         to: [{ email: appt.email, name: appt.name }],
-        subject: '¿Qué tal tu última cita?',
+        subject: 'Valoración de tu cita',
         htmlContent: `${companyLine}
+          <h2 style="margin:0 0 12px; font-size:18px;">Valoración de tu cita</h2>
           <p>Hola ${escapeHtml(appt.name)},</p>
-          <p>Gracias por venir${companyName ? ` a ${escapeHtml(companyName)}` : ''}. ¿Cómo valorarías tu experiencia?</p>
+          <p>Gracias por venir${companyName ? ` a ${escapeHtml(companyName)}` : ''} el ${formatSpanishDate(appt.date)}. ¿Cómo valorarías tu experiencia?</p>
           <table cellpadding="0" cellspacing="0" style="margin:16px 0;">${starsRow}</table>
           <p style="font-size:12px; color:#8a8a86;">Solo tienes que pulsar una opción, no hace falta nada más.</p>`,
       }),
