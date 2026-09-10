@@ -2431,9 +2431,15 @@ button {
 
 .chart-tooltip.hidden { display: none; }
 
-/* Vista de tabla (alternativa accesible a los gráficos) */
+/* Vista de tabla (alternativa accesible a los gráficos). En pantallas
+   estrechas la tabla no cabe entera: en vez de dejar que las cabeceras se
+   partan en dos o tres líneas (ilegible y con cada fila de alto distinto),
+   cada celda se mantiene en una sola línea y es el contenedor el que se
+   desplaza en horizontal; la sombra del borde derecho ("inset") avisa de
+   que hay más columnas fuera de la vista sin necesitar JS. */
 .stats-table-wrap {
   overflow-x: auto;
+  box-shadow: inset -12px 0 8px -8px rgba(20, 20, 25, 0.08);
 }
 
 .stats-table {
@@ -2447,6 +2453,7 @@ button {
   text-align: left;
   padding: 9px 10px;
   border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
 }
 
 .stats-table th {
